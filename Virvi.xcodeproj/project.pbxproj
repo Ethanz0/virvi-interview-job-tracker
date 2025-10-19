@@ -1,0 +1,772 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9458C2AD2E99015F00F996BF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AC2E99015F00F996BF /* WidgetKit.framework */; };
+		9458C2AF2E99015F00F996BF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AE2E99015F00F996BF /* SwiftUI.framework */; };
+		9458C2BA2E99016100F996BF /* InterviewQuestionWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		94BB6A8E2E99402C00061180 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 94BB6A8D2E99402C00061180 /* FirebaseAI */; };
+		94DBB29B2E8E00D30063C00B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB29A2E8E00D30063C00B /* FirebaseAuth */; };
+		94DBB29D2E8E00D30063C00B /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB29C2E8E00D30063C00B /* FirebaseCore */; };
+		94DBB29F2E8E00D30063C00B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB29E2E8E00D30063C00B /* FirebaseFirestore */; };
+		94DBB2A22E8E01230063C00B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB2A12E8E01230063C00B /* GoogleSignIn */; };
+		94DBB2A42E8E01230063C00B /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB2A32E8E01230063C00B /* GoogleSignInSwift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9458C2B82E99016100F996BF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 942FEE9B2E5CA7CD00637F70 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9458C2A92E99015F00F996BF;
+			remoteInfo = InterviewQuestionWidgetExtension;
+		};
+		94BB6A9D2E9A517000061180 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 942FEE9B2E5CA7CD00637F70 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 942FEEA22E5CA7CD00637F70;
+			remoteInfo = Virvi;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9458C2BB2E99016100F996BF /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9458C2BA2E99016100F996BF /* InterviewQuestionWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		942FEEA32E5CA7CD00637F70 /* Virvi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Virvi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = InterviewQuestionWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9458C2AC2E99015F00F996BF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		9458C2AE2E99015F00F996BF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		94BB6A992E9A517000061180 /* VirviTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VirviTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		94459E582E8D3A3E00DC67D2 /* Exceptions for "Virvi" folder in "Virvi" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 942FEEA22E5CA7CD00637F70 /* Virvi */;
+		};
+		9458C2BF2E99016100F996BF /* Exceptions for "InterviewQuestionWidget" folder in "InterviewQuestionWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */;
+		};
+		94BB6AA32E9A51B200061180 /* Exceptions for "Virvi" folder in "VirviTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Enums/Statuses.swift,
+				FirebaseManager.swift,
+				Model/Application.swift,
+				Model/AppUser.swift,
+				Model/Interview.swift,
+				Model/SDApplication.swift,
+				Repository/FireStoreApplicaitonRepository.swift,
+				Repository/IApplicationRepository.swift,
+				Repository/MockApplicationRepository.swift,
+				Repository/SwiftDataApplicationRepository.swift,
+				Repository/SyncManager.swift,
+				Services/AuthServicing.swift,
+				Services/GeminiService.swift,
+				View/Application/ApplicationRowView.swift,
+				View/Application/ApplicationsListView.swift,
+				View/Application/EditApplicationView.swift,
+				View/Application/StageTimelineView.swift,
+				View/ContentView.swift,
+				View/Interview/CompletedInterviewsView.swift,
+				View/Interview/InterviewChatView.swift,
+				View/Interview/InterviewForm.swift,
+				View/Interview/QuestionBubble.swift,
+				View/Interview/QuestionListView.swift,
+				View/Login/LoginView.swift,
+				View/Login/ProfileView.swift,
+				View/Logo/LogoCustomLayout.swift,
+				View/Logo/LogoSymbol.swift,
+				View/Logo/VirviLogoView.swift,
+				ViewModel/Application/ApplicationsListViewModel.swift,
+				ViewModel/Application/EditApplicationViewModel.swift,
+				ViewModel/Interview/CompletedInterviewsViewModel.swift,
+				ViewModel/Interview/DynamicInterviewViewModel.swift,
+				ViewModel/Interview/InterviewFormViewModel.swift,
+				ViewModel/Interview/InterviewViewModel.swift,
+				ViewModel/Interview/QuestionListViewModel.swift,
+				ViewModel/Interview/VideoViewModel.swift,
+				ViewModel/Login/AuthViewModel.swift,
+			);
+			target = 94BB6A982E9A517000061180 /* VirviTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		942FEEA52E5CA7CD00637F70 /* Virvi */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				94459E582E8D3A3E00DC67D2 /* Exceptions for "Virvi" folder in "Virvi" target */,
+				94BB6AA32E9A51B200061180 /* Exceptions for "Virvi" folder in "VirviTests" target */,
+			);
+			path = Virvi;
+			sourceTree = "<group>";
+		};
+		9458C2B02E99015F00F996BF /* InterviewQuestionWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9458C2BF2E99016100F996BF /* Exceptions for "InterviewQuestionWidget" folder in "InterviewQuestionWidgetExtension" target */,
+			);
+			path = InterviewQuestionWidget;
+			sourceTree = "<group>";
+		};
+		94BB6A9A2E9A517000061180 /* VirviTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VirviTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		942FEEA02E5CA7CD00637F70 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94DBB2A42E8E01230063C00B /* GoogleSignInSwift in Frameworks */,
+				94DBB29D2E8E00D30063C00B /* FirebaseCore in Frameworks */,
+				94DBB2A22E8E01230063C00B /* GoogleSignIn in Frameworks */,
+				94DBB29B2E8E00D30063C00B /* FirebaseAuth in Frameworks */,
+				94DBB29F2E8E00D30063C00B /* FirebaseFirestore in Frameworks */,
+				94BB6A8E2E99402C00061180 /* FirebaseAI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9458C2A72E99015F00F996BF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9458C2AF2E99015F00F996BF /* SwiftUI.framework in Frameworks */,
+				9458C2AD2E99015F00F996BF /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94BB6A962E9A517000061180 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		942FEE9A2E5CA7CD00637F70 = {
+			isa = PBXGroup;
+			children = (
+				942FEEA52E5CA7CD00637F70 /* Virvi */,
+				9458C2B02E99015F00F996BF /* InterviewQuestionWidget */,
+				94BB6A9A2E9A517000061180 /* VirviTests */,
+				9458C2AB2E99015F00F996BF /* Frameworks */,
+				942FEEA42E5CA7CD00637F70 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		942FEEA42E5CA7CD00637F70 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				942FEEA32E5CA7CD00637F70 /* Virvi.app */,
+				9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */,
+				94BB6A992E9A517000061180 /* VirviTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9458C2AB2E99015F00F996BF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9458C2AC2E99015F00F996BF /* WidgetKit.framework */,
+				9458C2AE2E99015F00F996BF /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		942FEEA22E5CA7CD00637F70 /* Virvi */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 942FEEAE2E5CA7CE00637F70 /* Build configuration list for PBXNativeTarget "Virvi" */;
+			buildPhases = (
+				942FEE9F2E5CA7CD00637F70 /* Sources */,
+				942FEEA02E5CA7CD00637F70 /* Frameworks */,
+				942FEEA12E5CA7CD00637F70 /* Resources */,
+				9458C2BB2E99016100F996BF /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9458C2B92E99016100F996BF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				942FEEA52E5CA7CD00637F70 /* Virvi */,
+			);
+			name = Virvi;
+			packageProductDependencies = (
+				94DBB29A2E8E00D30063C00B /* FirebaseAuth */,
+				94DBB29C2E8E00D30063C00B /* FirebaseCore */,
+				94DBB29E2E8E00D30063C00B /* FirebaseFirestore */,
+				94DBB2A12E8E01230063C00B /* GoogleSignIn */,
+				94DBB2A32E8E01230063C00B /* GoogleSignInSwift */,
+				94BB6A8D2E99402C00061180 /* FirebaseAI */,
+			);
+			productName = "Interview Me";
+			productReference = 942FEEA32E5CA7CD00637F70 /* Virvi.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9458C2BE2E99016100F996BF /* Build configuration list for PBXNativeTarget "InterviewQuestionWidgetExtension" */;
+			buildPhases = (
+				9458C2A62E99015F00F996BF /* Sources */,
+				9458C2A72E99015F00F996BF /* Frameworks */,
+				9458C2A82E99015F00F996BF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				9458C2B02E99015F00F996BF /* InterviewQuestionWidget */,
+			);
+			name = InterviewQuestionWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = InterviewQuestionWidgetExtension;
+			productReference = 9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		94BB6A982E9A517000061180 /* VirviTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 94BB6A9F2E9A517000061180 /* Build configuration list for PBXNativeTarget "VirviTests" */;
+			buildPhases = (
+				94BB6A952E9A517000061180 /* Sources */,
+				94BB6A962E9A517000061180 /* Frameworks */,
+				94BB6A972E9A517000061180 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				94BB6A9E2E9A517000061180 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				94BB6A9A2E9A517000061180 /* VirviTests */,
+			);
+			name = VirviTests;
+			packageProductDependencies = (
+			);
+			productName = VirviTests;
+			productReference = 94BB6A992E9A517000061180 /* VirviTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		942FEE9B2E5CA7CD00637F70 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					942FEEA22E5CA7CD00637F70 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					9458C2A92E99015F00F996BF = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					94BB6A982E9A517000061180 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 942FEEA22E5CA7CD00637F70;
+					};
+				};
+			};
+			buildConfigurationList = 942FEE9E2E5CA7CD00637F70 /* Build configuration list for PBXProject "Virvi" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 942FEE9A2E5CA7CD00637F70;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				94DBB2A02E8E01230063C00B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 942FEEA42E5CA7CD00637F70 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				942FEEA22E5CA7CD00637F70 /* Virvi */,
+				9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */,
+				94BB6A982E9A517000061180 /* VirviTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		942FEEA12E5CA7CD00637F70 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9458C2A82E99015F00F996BF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94BB6A972E9A517000061180 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		942FEE9F2E5CA7CD00637F70 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9458C2A62E99015F00F996BF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94BB6A952E9A517000061180 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9458C2B92E99016100F996BF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */;
+			targetProxy = 9458C2B82E99016100F996BF /* PBXContainerItemProxy */;
+		};
+		94BB6A9E2E9A517000061180 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 942FEEA22E5CA7CD00637F70 /* Virvi */;
+			targetProxy = 94BB6A9D2E9A517000061180 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		942FEEAC2E5CA7CE00637F70 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = AC69R9P379;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		942FEEAD2E5CA7CE00637F70 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = AC69R9P379;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		942FEEAF2E5CA7CE00637F70 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Virvi/Virvi.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6V5MXK3VE;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Virvi/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Record interview responses";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record audio for interview";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe your responses";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Ethan.Virvi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		942FEEB02E5CA7CE00637F70 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Virvi/Virvi.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6V5MXK3VE;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Virvi/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Record interview responses";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record audio for interview";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe your responses";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Ethan.Virvi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9458C2BC2E99016100F996BF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6V5MXK3VE;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = InterviewQuestionWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = InterviewQuestionWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Ethan.Virvi.InterviewQuestionWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9458C2BD2E99016100F996BF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6V5MXK3VE;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = InterviewQuestionWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = InterviewQuestionWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Ethan.Virvi.InterviewQuestionWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		94BB6AA02E9A517000061180 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6V5MXK3VE;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Ethan.VirviTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Virvi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Virvi";
+			};
+			name = Debug;
+		};
+		94BB6AA12E9A517000061180 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6V5MXK3VE;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Ethan.VirviTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Virvi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Virvi";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		942FEE9E2E5CA7CD00637F70 /* Build configuration list for PBXProject "Virvi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				942FEEAC2E5CA7CE00637F70 /* Debug */,
+				942FEEAD2E5CA7CE00637F70 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		942FEEAE2E5CA7CE00637F70 /* Build configuration list for PBXNativeTarget "Virvi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				942FEEAF2E5CA7CE00637F70 /* Debug */,
+				942FEEB02E5CA7CE00637F70 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9458C2BE2E99016100F996BF /* Build configuration list for PBXNativeTarget "InterviewQuestionWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9458C2BC2E99016100F996BF /* Debug */,
+				9458C2BD2E99016100F996BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		94BB6A9F2E9A517000061180 /* Build configuration list for PBXNativeTarget "VirviTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				94BB6AA02E9A517000061180 /* Debug */,
+				94BB6AA12E9A517000061180 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.3.0;
+			};
+		};
+		94DBB2A02E8E01230063C00B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		94BB6A8D2E99402C00061180 /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		94DBB29A2E8E00D30063C00B /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		94DBB29C2E8E00D30063C00B /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		94DBB29E2E8E00D30063C00B /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		94DBB2A12E8E01230063C00B /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2A02E8E01230063C00B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		94DBB2A32E8E01230063C00B /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2A02E8E01230063C00B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 942FEE9B2E5CA7CD00637F70 /* Project object */;
+}

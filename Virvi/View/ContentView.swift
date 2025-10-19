@@ -1,0 +1,117 @@
+import SwiftUI
+import SwiftData
+
+enum InterviewDestination: Hashable {
+    case questionList(Interview)
+    case dynamicInterview(Interview)
+    case interview(Interview)
+}
+
+struct ContentView: View {
+    @EnvironmentObject var auth: AuthViewModel
+    @Environment(\.modelContext) private var modelContext
+    
+    @State private var selectedTab = 0
+    @State private var interviewPath = NavigationPath()
+    @State private var syncManager: SyncManager?
+    
+    // Create repository based on ModelContext
+    private var repository: ApplicationRepository {
+        SwiftDataApplicationRepository(modelContext: modelContext)
+    }
+    
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            // Applications List - works offline
+            ApplicationsListView(repository: repository)
+                .tabItem {
+                    Label("Applications", systemImage: "list.bullet")
+                }
+                .tag(0)
+            
+            // New Interview
+            NavigationStack(path: $interviewPath) {
+                InterviewForm(path: $interviewPath)
+                    .navigationDestination(for: InterviewDestination.self) { destination in
+                        switch destination {
+                        case .questionList(let interview):
+                            QuestionListView(interview: interview, path: $interviewPath)
+                        case .dynamicInterview(let interview):
+                            InterviewChatView(interview: interview, isDynamicMode: true, path: $interviewPath)
+                        case .interview(let interview):
+                            InterviewChatView(interview: interview, isDynamicMode: false, path: $interviewPath)
+                        }
+                    }
+            }
+            .tabItem {
+                Label("New Interview", systemImage: "plus.circle.fill")
+            }
+            .tag(1)
+            
+            // Completed Interviews
+            CompletedInterviewsView()
+                .tabItem {
+                    Label("Completed", systemImage: "checkmark.circle.fill")
+                }
+                .tag(2)
+            
+            // Profile with sync status
+            if let syncManager = syncManager {
+                ProfileView(syncManager: syncManager)
+                    .tabItem {
+                        Label("Profile", systemImage: "person.fill")
+                    }
+                    .tag(3)
+            } else {
+                ProfileView(syncManager: SyncManager(modelContext: modelContext))
+                    .tabItem {
+                        Label("Profile", systemImage: "person.fill")
+                    }
+                    .tag(3)
+            }
+        }
+        .onAppear {
+            // Initialize sync manager once with the environment context
+            if syncManager == nil {
+                setupSyncManager()
+            }
+        }
+        .onChange(of: auth.user) { oldUser, newUser in
+            handleAuthChange(oldUser: oldUser, newUser: newUser)
+        }
+    }
+    
+    private func setupSyncManager() {
+        // Create sync manager with actual environment context
+        let manager = SyncManager(modelContext: modelContext)
+        syncManager = manager
+        
+        if let user = auth.user {
+            manager.enableSync(for: user.id)
+            Task {
+                await manager.performInitialSync(userId: user.id)
+            }
+        }
+    }
+    
+    private func handleAuthChange(oldUser: AppUser?, newUser: AppUser?) {
+        guard let manager = syncManager else { return }
+        
+        if let user = newUser {
+            // User logged in - enable sync
+            manager.enableSync(for: user.id)
+            Task {
+                await manager.performInitialSync(userId: user.id)
+            }
+        } else if oldUser != nil {
+            // User logged out - disable sync (keep local data)
+            manager.disableSync()
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+        .environmentObject(AuthViewModel(authService: MockAuthService()))
+        .modelContainer(for: [SDApplication.self, Interview.self], inMemory: true)
+}
