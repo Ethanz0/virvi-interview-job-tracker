@@ -18,6 +18,7 @@ class MockApplicationRepository: ApplicationRepository {
         return applications
     }
     
+    
     func createApplication(_ application: Application, for userId: String) async throws -> String {
         let id = UUID().uuidString
         var newApp = application
