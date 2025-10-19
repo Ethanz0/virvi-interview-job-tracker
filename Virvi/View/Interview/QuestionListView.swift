@@ -92,7 +92,16 @@ struct QuestionListView: View {
                 // Ensure nessecary form fields have been filled out
                 .disabled(!viewModel.canStart || viewModel.isSaving)
             }
+            // Keyboard dismiss button
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    hideKeyboard()
+                }
+            }
         }
+        .scrollDismissesKeyboard(.interactively)
+
     }
 }
 

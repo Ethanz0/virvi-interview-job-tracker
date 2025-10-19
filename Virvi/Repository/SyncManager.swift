@@ -6,6 +6,7 @@ import FirebaseFirestore
 /// Handles bidirectional sync between SwiftData and Firestore
 @MainActor
 class SyncManager: ObservableObject {
+
     @Published var isSyncing = false
     @Published var lastSyncDate: Date?
     @Published var syncError: String?
@@ -19,7 +20,7 @@ class SyncManager: ObservableObject {
     // Sync configuration
     private let debounceInterval: TimeInterval = 5.0  // Wait 5 seconds after last change
     private let minSyncInterval: TimeInterval = 30.0  // Don't sync more than once per 30 seconds
-    
+        
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         self.firestoreRepo = FirestoreApplicationRepository()
@@ -130,13 +131,13 @@ class SyncManager: ObservableObject {
             let hasChanges = try await checkForPendingChanges()
             
             if !hasChanges {
-                print("✨ No changes to sync - skipping Firestore calls")
+                print("No changes to sync - skipping Firestore calls")
                 lastSyncDate = Date()
                 isSyncing = false
                 return
             }
             
-            print("🔄 Starting sync - found pending changes")
+            print("Starting sync - found pending changes")
             
             // Push deletions and updates to Firestore first
             await pushToFirestore(userId: userId)
@@ -444,7 +445,7 @@ class SyncManager: ObservableObject {
                     for: sdApp.firestoreId ?? sdApp.id,
                     userId: userId
                 )
-                print("⬆️ Deleted stage from Firestore")
+                print("Deleted stage from Firestore")
                 // Mark as synced so it can be cleaned up
                 sdStage.needsSync = false
                 sdStage.lastSyncedAt = Date()
@@ -472,4 +473,5 @@ class SyncManager: ObservableObject {
         sdStage.needsSync = false
         sdStage.lastSyncedAt = Date()
     }
+
 }

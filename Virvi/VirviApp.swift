@@ -27,10 +27,10 @@ struct Virvi: App {
         
         do {
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            print("✅ ModelContainer created with all models")
+            print("ModelContainer created with all models")
             return container
         } catch {
-            print("❌ ModelContainer creation failed: \(error)")
+            print("ModelContainer creation failed: \(error)")
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
@@ -66,7 +66,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         if let clientID = FirebaseApp.app()?.options.clientID {
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
         } else {
-            print("⚠️ Warning: Missing Firebase clientID")
+            print("Warning: Missing Firebase clientID")
         }
         return true
     }

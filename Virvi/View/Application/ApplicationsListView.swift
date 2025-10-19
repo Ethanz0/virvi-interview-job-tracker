@@ -88,6 +88,12 @@ struct ApplicationsListView: View {
                         Image(systemName: "plus")
                     }
                 }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        hideKeyboard()
+                    }
+                }
             }
             // Sheet for new application
             .sheet(isPresented: $showingAddSheet) {
@@ -121,6 +127,8 @@ struct ApplicationsListView: View {
                 }
             }
         }
+        .scrollDismissesKeyboard(.interactively)
+
     }
     
     // MARK: - Applications List
@@ -228,7 +236,7 @@ struct ApplicationsListView: View {
         } else if viewModel.showStarredOnly {
             return "No Starred Applications"
         } else if let filter = viewModel.selectedStatusFilter {
-            return "No \(filter) Applications"
+            return "No \(filter.rawValue) Applications"
         } else {
             return "No Results Found"
         }

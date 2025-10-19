@@ -38,20 +38,20 @@ enum QuestionMode: String, CaseIterable, Identifiable {
     
     var id: String { self.rawValue }
 }
-// MARK: - Interview Form View
-/// This view is the initial form the user fills out to specify the configuration of the interview
+
+
 struct InterviewForm: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = InterviewFormViewModel()
-    /// Path used for navigating between ``InterviewForm``, ``InterviewChatView`` and ``QuestionListView``
     @Binding var path: NavigationPath
+    let resetTrigger: UUID
     
     var body: some View {
         Form {
             Section("Interview Title") {
                 TextField("Interview Title", text: $viewModel.interviewTitle)
             }
-            // Use enum to show picker of times
+            
             Section("Question Time Limit") {
                 Picker("Duration", selection: $viewModel.duration) {
                     ForEach(QuestionDuration.allCases) { duration in
@@ -61,7 +61,6 @@ struct InterviewForm: View {
                 .pickerStyle(.segmented)
             }
 
-            // Question generation method
             Section("Question Generation") {
                 Picker("Method", selection: $viewModel.questionMode) {
                     ForEach(QuestionMode.allCases) { mode in
@@ -71,7 +70,6 @@ struct InterviewForm: View {
                 .pickerStyle(.segmented)
             }
             
-            // Ask for number of questions and optional interview context if using one of the AI modes
             if viewModel.questionMode == .aiGenerated || viewModel.questionMode == .dynamic {
                 Section("Number of Questions") {
                     Stepper("Questions: \(viewModel.numQuestions)",
@@ -82,8 +80,7 @@ struct InterviewForm: View {
                         .frame(minHeight: 100)
                 }
             }
-            // MARK: - Continue Button
-            // Continue/Generating button if the user is generating quetsions
+            
             Section {
                 Button(action: createInterviewAndNavigate) {
                     HStack {
@@ -101,20 +98,30 @@ struct InterviewForm: View {
             }
         }
         .navigationTitle("Interview Details")
+        .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    hideKeyboard()
+                }
+            }
+        }
         .alert("Error", isPresented: $viewModel.showError) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(viewModel.errorMessage)
         }
-        // Setup viewmodel on startup
         .onAppear {
             viewModel.setup(with: modelContext)
         }
+        .onChange(of: resetTrigger) { _, _ in
+            hideKeyboard()
+            viewModel.resetForm()
+        }
+
     }
     
-    /// This function is triggered after the user presses continue on the form
-    /// If the question mode is dynamic, append to the navigation path, a enum of type ``QuestionMode/dynamic`` to go immediately to ``InterviewForm``
-    /// Otherwise continue to ``QuestionListView``
     func createInterviewAndNavigate() {
         Task { @MainActor in
             if let newInterview = await viewModel.createInterview() {
@@ -125,5 +132,11 @@ struct InterviewForm: View {
                 }
             }
         }
+    }
+}
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                       to: nil, from: nil, for: nil)
     }
 }

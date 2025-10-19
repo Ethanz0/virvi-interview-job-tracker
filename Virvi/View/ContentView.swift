@@ -14,48 +14,63 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @State private var interviewPath = NavigationPath()
     @State private var syncManager: SyncManager?
+    @State private var formResetTrigger = UUID()
     
-    // Create repository based on ModelContext
-    private var repository: ApplicationRepository {
-        SwiftDataApplicationRepository(modelContext: modelContext)
+    private var applicationRepository: ApplicationRepository {
+        SwiftDataApplicationRepository(
+            modelContext: modelContext,
+            syncManager: syncManager
+        )
     }
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Applications List - works offline
-            ApplicationsListView(repository: repository)
+            ApplicationsListView(repository: applicationRepository)
                 .tabItem {
                     Label("Applications", systemImage: "list.bullet")
                 }
                 .tag(0)
             
-            // New Interview
             NavigationStack(path: $interviewPath) {
-                InterviewForm(path: $interviewPath)
-                    .navigationDestination(for: InterviewDestination.self) { destination in
-                        switch destination {
-                        case .questionList(let interview):
-                            QuestionListView(interview: interview, path: $interviewPath)
-                        case .dynamicInterview(let interview):
-                            InterviewChatView(interview: interview, isDynamicMode: true, path: $interviewPath)
-                        case .interview(let interview):
-                            InterviewChatView(interview: interview, isDynamicMode: false, path: $interviewPath)
-                        }
+                InterviewForm(
+                    path: $interviewPath,
+                    resetTrigger: formResetTrigger
+                )
+                .navigationDestination(for: InterviewDestination.self) { destination in
+                    switch destination {
+                    case .questionList(let interview):
+                        QuestionListView(
+                            interview: interview,
+                            path: $interviewPath
+                        )
+                    case .dynamicInterview(let interview):
+                        InterviewChatView(
+                            interview: interview,
+                            isDynamicMode: true,
+                            path: $interviewPath,
+                            onComplete: resetInterviewForm
+                        )
+                    case .interview(let interview):
+                        InterviewChatView(
+                            interview: interview,
+                            isDynamicMode: false,
+                            path: $interviewPath,
+                            onComplete: resetInterviewForm
+                        )
                     }
+                }
             }
             .tabItem {
                 Label("New Interview", systemImage: "plus.circle.fill")
             }
             .tag(1)
             
-            // Completed Interviews
             CompletedInterviewsView()
                 .tabItem {
                     Label("Completed", systemImage: "checkmark.circle.fill")
                 }
                 .tag(2)
             
-            // Profile with sync status
             if let syncManager = syncManager {
                 ProfileView(syncManager: syncManager)
                     .tabItem {
@@ -71,7 +86,6 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Initialize sync manager once with the environment context
             if syncManager == nil {
                 setupSyncManager()
             }
@@ -81,8 +95,11 @@ struct ContentView: View {
         }
     }
     
+    private func resetInterviewForm() {
+        formResetTrigger = UUID()
+    }
+    
     private func setupSyncManager() {
-        // Create sync manager with actual environment context
         let manager = SyncManager(modelContext: modelContext)
         syncManager = manager
         
@@ -98,13 +115,11 @@ struct ContentView: View {
         guard let manager = syncManager else { return }
         
         if let user = newUser {
-            // User logged in - enable sync
             manager.enableSync(for: user.id)
             Task {
                 await manager.performInitialSync(userId: user.id)
             }
         } else if oldUser != nil {
-            // User logged out - disable sync (keep local data)
             manager.disableSync()
         }
     }

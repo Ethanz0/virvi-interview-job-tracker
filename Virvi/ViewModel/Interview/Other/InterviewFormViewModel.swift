@@ -5,6 +5,13 @@
 //  Created by Ethan Zhang on 6/10/2025.
 //
 
+//
+//  InterviewFormViewModel.swift
+//  Virvi
+//
+//  Updated to support form reset
+//
+
 import Foundation
 import SwiftUI
 import SwiftData
@@ -26,6 +33,17 @@ class InterviewFormViewModel: ObservableObject {
         self.modelContext = modelContext
     }
     
+    func resetForm() {
+        interviewTitle = ""
+        duration = .seconds30
+        numQuestions = 3
+        additionalNotes = ""
+        questionMode = .manual
+        isGenerating = false
+        showError = false
+        errorMessage = ""
+    }
+    
     @MainActor
     func createInterview() async -> Interview? {
         guard let modelContext = modelContext else {
@@ -37,7 +55,6 @@ class InterviewFormViewModel: ObservableObject {
         isGenerating = true
         defer { isGenerating = false }
         
-        // Create interview with appropriate settings
         let newInterview = Interview(
             title: interviewTitle,
             duration: duration.rawValue,
@@ -46,7 +63,6 @@ class InterviewFormViewModel: ObservableObject {
             maxQuestions: questionMode == .dynamic ? numQuestions : nil
         )
         
-        // Generate questions if AI Generated mode
         if questionMode == .aiGenerated {
             do {
                 let questionStrings = try await geminiService.generateQuestions(
@@ -56,12 +72,10 @@ class InterviewFormViewModel: ObservableObject {
                     duration: duration.rawValue
                 )
                 
-                // Convert question strings to Question objects
                 let questionObjects = questionStrings.enumerated().map { index, questionText in
                     Question(question: questionText, order: index)
                 }
                 
-                // Add questions to interview
                 newInterview.questions = questionObjects
                 
             } catch {
@@ -73,7 +87,6 @@ class InterviewFormViewModel: ObservableObject {
             }
         }
 
-        // Insert interview
         modelContext.insert(newInterview)
         
         do {

@@ -3,10 +3,13 @@ import SwiftData
 
 // MARK: - SwiftData Repository Implementation
 class SwiftDataApplicationRepository: ApplicationRepository {
+    private weak var syncManager: SyncManager?
+
     private let modelContext: ModelContext
     
-    init(modelContext: ModelContext) {
+    init(modelContext: ModelContext, syncManager: SyncManager?) {
         self.modelContext = modelContext
+        self.syncManager = syncManager
     }
     
     // MARK: - Application CRUD
@@ -50,7 +53,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         
         modelContext.insert(sdApp)
         try modelContext.save()
-        
+        await syncManager?.scheduleSync()
         return sdApp.id
     }
     
@@ -80,6 +83,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         sdApp.needsSync = true
         
         try modelContext.save()
+        await syncManager?.scheduleSync()
     }
     
     func deleteApplication(id: String, for userId: String) async throws {
@@ -106,6 +110,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         }
         
         try modelContext.save()
+        await syncManager?.scheduleSync()
     }
     
     func toggleStar(applicationId: String, for userId: String) async throws {
@@ -124,6 +129,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         sdApp.needsSync = true
         
         try modelContext.save()
+        await syncManager?.scheduleSync()
     }
     
     // MARK: - Stage CRUD
@@ -173,7 +179,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         sdApp.needsSync = true
         
         try modelContext.save()
-        
+        await syncManager?.scheduleSync()
         return sdStage.id
     }
     
@@ -206,6 +212,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         }
         
         try modelContext.save()
+        await syncManager?.scheduleSync()
     }
     
     func deleteStage(id: String, for applicationId: String, userId: String) async throws {
@@ -230,6 +237,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         }
         
         try modelContext.save()
+        await syncManager?.scheduleSync()
     }
     
     func deleteAllStages(for applicationId: String, userId: String) async throws {
@@ -251,5 +259,6 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         }
         
         try modelContext.save()
+        await syncManager?.scheduleSync()
     }
 }

@@ -91,6 +91,14 @@ struct EditApplicationView: View {
                     // Prevent saving if company and role not filled
                     .disabled(!viewModel.isFormValid || viewModel.isLoading)
                 }
+                
+                // Keyboard dismiss button
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        hideKeyboard()
+                    }
+                }
             }
             .disabled(viewModel.isLoading)
             // Loading, if application being saved
@@ -102,8 +110,8 @@ struct EditApplicationView: View {
                         .background(Color.black.opacity(0.2))
                 }
             }
-            
         }
+        .scrollDismissesKeyboard(.interactively)
     }
 
     // MARK: - Job Details Sections
