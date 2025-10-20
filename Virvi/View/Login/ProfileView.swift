@@ -1,3 +1,5 @@
+
+import CryptoKit
 import SwiftUI
 import SwiftData
 
@@ -261,19 +263,22 @@ struct ProfileView: View {
             interviewCount = 0
         }
     }
-    
+
     private func gradientColors(for user: AppUser) -> [Color] {
         let input = user.email + user.firstName
-        let hash = input.hashValue
+        let digest = SHA256.hash(data: Data(input.utf8))
+        let bytes = Array(digest) // convert digest -> [UInt8]
         
-        let hue1 = Double(abs(hash) % 360) / 360.0
-        let hue2 = Double(abs(hash.byteSwapped) % 360) / 360.0
+        // digest is 32 bytes, so indexing 0 and 1 is safe
+        let hue1 = Double(bytes[0]) / 255.0
+        let hue2 = Double(bytes[1]) / 255.0
         
         return [
             Color(hue: hue1, saturation: 0.7, brightness: 0.8),
             Color(hue: hue2, saturation: 0.6, brightness: 0.7)
         ]
     }
+
 }
 
 struct AccountSettingsView: View {
@@ -486,10 +491,12 @@ struct AccountSettingsView: View {
     
     private func gradientColors(for user: AppUser) -> [Color] {
         let input = user.email + user.firstName
-        let hash = input.hashValue
+        let digest = SHA256.hash(data: Data(input.utf8))
+        let bytes = Array(digest) // convert digest -> [UInt8]
         
-        let hue1 = Double(abs(hash) % 360) / 360.0
-        let hue2 = Double(abs(hash.byteSwapped) % 360) / 360.0
+        // digest is 32 bytes, so indexing 0 and 1 is safe
+        let hue1 = Double(bytes[0]) / 255.0
+        let hue2 = Double(bytes[1]) / 255.0
         
         return [
             Color(hue: hue1, saturation: 0.7, brightness: 0.8),
