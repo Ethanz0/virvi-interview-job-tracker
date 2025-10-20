@@ -7,29 +7,14 @@ import BackgroundTasks
 @main
 struct Virvi: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var auth: AuthViewModel
+    @StateObject private var dependencies: AppDependencies
     
-    // Initialize auth AFTER Firebase is configured
-    init() {
-        // Configure Firebase FIRST, before anything else
-        if FirebaseApp.app() == nil {
-            FirebaseApp.configure()
-        }
-        
-        // Configure Google Sign-In
-        if let clientID = FirebaseApp.app()?.options.clientID {
-            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
-        }
-    }
-    
-    @StateObject private var auth = AuthViewModel()
-    
-    // SwiftData container with models including existing Interview models
+    // SwiftData container
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            // New application tracking models
             SDApplication.self,
             SDApplicationStage.self,
-            // Existing interview models
             Interview.self,
             Question.self
         ])
@@ -50,42 +35,66 @@ struct Virvi: App {
         }
     }()
     
+    init() {
+        // Configure Firebase FIRST
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+        
+        // Configure Google Sign-In
+        if let clientID = FirebaseApp.app()?.options.clientID {
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+        }
+        
+        // Create dependencies with the model context
+        let context = sharedModelContainer.mainContext
+        let deps = AppDependencies(modelContext: context)
+        _dependencies = StateObject(wrappedValue: deps)
+        
+        // Create auth view model
+        _auth = StateObject(wrappedValue: AuthViewModel(authService: deps.authService))
+    }
+    
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(auth)
-                .onChange(of: auth.user) { oldValue, newValue in
-                    // Setup sync when user authenticates
-                    if newValue != nil, oldValue == nil {
-                        Task {
-                            let context = sharedModelContainer.mainContext
-                            _ = SyncManager(modelContext: context)
+            WindowGroup {
+                ContentView()
+                    .environmentObject(auth)
+                    .environmentObject(dependencies)
+                    .task {
+                        if let user = auth.user {
+                            await dependencies.enableSync(for: user.id)
                         }
                     }
-                }
+                    .onChange(of: auth.user) { oldValue, newValue in
+                        Task {
+                            if newValue != nil, oldValue == nil {
+                                // User just logged in
+                                await dependencies.enableSync(for: newValue!.id)
+                            } else if newValue == nil, oldValue != nil {
+                                // User just logged out
+                                await dependencies.disableSync()
+                            }
+                        }
+                    }
+            }
+            .modelContainer(sharedModelContainer)
+            .backgroundTask(.appRefresh("com.virvi.app.refresh-question")) {
+                await handleBackgroundQuestionRefresh()
+            }
         }
-        .modelContainer(sharedModelContainer)
-        .backgroundTask(.appRefresh("com.virvi.app.refresh-question")) {
-            await handleBackgroundQuestionRefresh()
-        }
-    }
-    
-    // MARK: - Background Task Handler
     
     private func handleBackgroundQuestionRefresh() async {
-        print("🔔 Background task is running!")
-        
+        print("Background task is running!")
         scheduleNextBackgroundRefresh()
         
-        let service = QuestionUpdateService()
-        await service.updateQuestionIfNeeded()
+        // Use the question service from dependencies
+        await dependencies.questionService.updateQuestionIfNeeded()
         
-        print("✅ Background task completed!")
+        print("Background task completed!")
     }
+    
     private func scheduleNextBackgroundRefresh() {
         let request = BGAppRefreshTaskRequest(identifier: "com.virvi.app.refresh-question")
-        
-        // Request refresh in 24 hours
         request.earliestBeginDate = Calendar.current.date(
             byAdding: .hour,
             value: 24,
@@ -101,16 +110,11 @@ struct Virvi: App {
     }
 }
 
+// AppDelegate stays the same
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions:
     [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        
-        // Firebase is now configured in App init()
-        // This just ensures it's available for app delegate methods
-        
-        // DO NOT register background task here - it's handled by .backgroundTask modifier
-        
         return true
     }
     
@@ -121,14 +125,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func applicationDidEnterBackground(_ application: UIApplication) {
-        // Schedule background refresh when app goes to background
         scheduleBackgroundRefresh()
     }
     
     private func scheduleBackgroundRefresh() {
         let request = BGAppRefreshTaskRequest(identifier: "com.virvi.app.refresh-question")
-        
-        // Request refresh in 24 hours
         request.earliestBeginDate = Calendar.current.date(
             byAdding: .hour,
             value: 24,

@@ -10,7 +10,6 @@ import Foundation
 import WidgetKit
 
 class SharedQuestionCache {
-    // IMPORTANT: Use YOUR app group identifier here
     private static let appGroupID = "group.com.virvi.app"
     
     private static var sharedDefaults: UserDefaults? {
@@ -49,7 +48,7 @@ class SharedQuestionCache {
     /// Check if we need a new question (older than 24 hours)
     static func needsNewQuestion() -> Bool {
         guard let lastUpdate = getQuestionDate() else {
-            return true // No question cached yet
+            return true
         }
         
         let hoursSinceUpdate = Date().timeIntervalSince(lastUpdate) / 3600

@@ -1,12 +1,18 @@
 import SwiftUI
 
 struct ApplicationsListView: View {
+    let repository: ApplicationRepository
     @EnvironmentObject var auth: AuthViewModel
+    @EnvironmentObject var dependencies: AppDependencies
     @StateObject private var viewModel: ApplicationsListViewModel
     @State private var showingAddSheet = false
     
     init(repository: ApplicationRepository) {
-        _viewModel = StateObject(wrappedValue: ApplicationsListViewModel(repository: repository))
+        self.repository = repository
+        self._showingAddSheet = State(initialValue: false)
+        self._viewModel = StateObject(wrappedValue: ApplicationsListViewModel(repository: repository))
+        self._viewModel = StateObject(wrappedValue: ApplicationsListViewModel(repository: repository))
+
     }
     
     var body: some View {
@@ -32,6 +38,9 @@ struct ApplicationsListView: View {
             .searchable(text: $viewModel.searchText, prompt: "Search applications")
             .onChange(of: viewModel.searchText) { _, _ in
                 viewModel.applyFilters()
+            }
+            .onAppear {
+                viewModel.setSyncManager(dependencies.syncManager)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

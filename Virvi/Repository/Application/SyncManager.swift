@@ -9,6 +9,7 @@ class SyncManager: ObservableObject {
     @Published var isSyncing = false
     @Published var lastSyncDate: Date?
     @Published var syncError: String?
+    @Published var syncCompleted = false
     
     private let modelContext: ModelContext
     private let firestoreRepo: FirestoreApplicationRepository
@@ -67,7 +68,7 @@ class SyncManager: ObservableObject {
             }
             
             try modelContext.save()
-            print("✅ Cleared \(allApps.count) applications")
+            print("Cleared \(allApps.count) applications")
             
             // Reset sync state
             lastSyncDate = nil
@@ -82,8 +83,11 @@ class SyncManager: ObservableObject {
     // MARK: - Sync Methods
     
     func scheduleSync() {
-        print("2 schedule begining")
-        guard let userId = userId else { return }
+        print("📱 scheduleSync called - userId: \(userId ?? "nil")")
+        guard let userId = userId else {
+            print("scheduleSync aborted - no userId set")
+            return
+        }
         
         syncTask?.cancel()
         hasPendingChanges = true
@@ -169,7 +173,7 @@ class SyncManager: ObservableObject {
         syncError = nil
         
 //        do {
-            print("🔄 Starting full sync (including pull from cloud)")
+            print("Starting full sync (including pull from cloud)")
             
             // Push FIRST to sync any local changes created while offline
             await pushToFirestore(userId: userId)
@@ -180,6 +184,8 @@ class SyncManager: ObservableObject {
             await cleanupSyncedDeletions()
             
             lastSyncDate = Date()
+            syncCompleted.toggle()
+
             print("Full sync completed successfully")
 //        } catch {
 //            syncError = error.localizedDescription

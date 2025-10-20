@@ -11,7 +11,6 @@ class QuestionUpdateService {
     
     func updateDailyQuestion() async {
         do {
-            // Use the new widget-specific function
             let question = try await geminiService.generateQuestionOfTheDay()
             
             // Save to shared cache

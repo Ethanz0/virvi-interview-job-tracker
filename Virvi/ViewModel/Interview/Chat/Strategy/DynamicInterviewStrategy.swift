@@ -64,7 +64,7 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
         self.duration = interview.duration
         
         let model = ai.generativeModel(
-            modelName: "gemini-2.5-flash",
+            modelName: "gemini-2.5-flash-lite",
             systemInstruction: ModelContent(role: "system", parts: systemPrompt)
         )
         

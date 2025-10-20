@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import Combine
 
 /// ViewModel for managing the list of job applications
 @MainActor
@@ -19,10 +20,41 @@ class ApplicationsListViewModel: ObservableObject {
     @Published var selectedApplicationToEdit: ApplicationWithStages?
     
     let repository: ApplicationRepository
+    private var syncManager: SyncManager?
+    private var syncCancellable: AnyCancellable?
+    
     var statuses: [ApplicationStatus] { ApplicationStatus.allCases }
     
-    init(repository: ApplicationRepository) {
+    init(repository: ApplicationRepository, syncManager: SyncManager? = nil) {
         self.repository = repository
+        self.syncManager = syncManager
+        
+        if let syncManager = syncManager {
+            syncCancellable = syncManager.$isSyncing
+                .dropFirst()  // Skip initial value
+                .sink { [weak self] isSyncing in
+                    if !isSyncing {
+                        Task { @MainActor [weak self] in
+                            await self?.refreshApplications()
+                        }
+                    }
+                }
+        }
+    }
+    
+    func setSyncManager(_ syncManager: SyncManager) {
+        guard self.syncManager == nil else { return }
+        self.syncManager = syncManager
+        
+        syncCancellable = syncManager.$isSyncing
+            .dropFirst()
+            .sink { [weak self] isSyncing in
+                if !isSyncing {
+                    Task { @MainActor [weak self] in
+                        await self?.refreshApplications()
+                    }
+                }
+            }
     }
     
     func loadApplications() async {
