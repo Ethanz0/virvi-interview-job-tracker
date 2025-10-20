@@ -14,6 +14,7 @@ protocol ApplicationRepository {
     func updateApplication(_ application: Application, for userId: String) async throws
     func deleteApplication(id: String, for userId: String) async throws
     func toggleStar(applicationId: String, for userId: String) async throws
+    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> Application?
     
     // Stage CRUD
     func fetchStages(for applicationId: String, userId: String) async throws -> [ApplicationStage]

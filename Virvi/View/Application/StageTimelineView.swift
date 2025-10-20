@@ -45,7 +45,7 @@ struct StageTimelineView: View {
                                 .fontWeight(.medium)
                             
                             Spacer()
-                            Text(formatStageDate(stage.date))
+                            Text(stage.formattedDate)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
 
@@ -68,51 +68,51 @@ struct StageTimelineView: View {
     }
 
     
-    private func formatStageDate(_ dateString: String) -> String {
-        guard let date = dateString.toDate() else { return dateString }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: date)
-    }
+//    private func formatStageDate(_ dateString: String) -> String {
+//        guard let date = dateString.toDate() else { return dateString }
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "MMM d"
+//        return formatter.string(from: date)
+//    }
 }
 
 // MARK: - Preview
 
-#Preview {
-    let mockStages = [
-        ApplicationStage(
-            id: "s1",
-            stage: StageType.applied,
-            status: StageStatus.complete,
-            date: "2024-09-01",
-            note: "Application submitted online",
-            sortOrder: 0
-        ),
-        ApplicationStage(
-            id: "s2",
-            stage: StageType.phoneScreening,
-            status: StageStatus.complete,
-            date: "2024-09-05",
-            note: "30 min call with recruiter",
-            sortOrder: 1
-        ),
-        ApplicationStage(
-            id: "s3",
-            stage: StageType.interview,
-            status: StageStatus.inProgress,
-            date: "2024-09-15",
-            note: "Coming up this week",
-            sortOrder: 2
-        ),
-        ApplicationStage(
-            id: "s4",
-            stage: StageType.awaitingOffer,
-            status: StageStatus.incomplete,
-            date: "2024-09-20",
-            note: "",
-            sortOrder: 3
-        )
-    ]
-    
-    StageTimelineView(stages: mockStages)
-}
+//#Preview {
+//    let mockStages = [
+//        ApplicationStage(
+//            id: "s1",
+//            stage: StageType.applied,
+//            status: StageStatus.complete,
+//            date: "2024-09-01",
+//            note: "Application submitted online",
+//            sortOrder: 0
+//        ),
+//        ApplicationStage(
+//            id: "s2",
+//            stage: StageType.phoneScreening,
+//            status: StageStatus.complete,
+//            date: "2024-09-05",
+//            note: "30 min call with recruiter",
+//            sortOrder: 1
+//        ),
+//        ApplicationStage(
+//            id: "s3",
+//            stage: StageType.interview,
+//            status: StageStatus.inProgress,
+//            date: "2024-09-15",
+//            note: "Coming up this week",
+//            sortOrder: 2
+//        ),
+//        ApplicationStage(
+//            id: "s4",
+//            stage: StageType.awaitingOffer,
+//            status: StageStatus.incomplete,
+//            date: "2024-09-20",
+//            note: "",
+//            sortOrder: 3
+//        )
+//    ]
+//    
+//    StageTimelineView(stages: mockStages)
+//}

@@ -155,7 +155,7 @@ struct EditApplicationView: View {
                                     .foregroundColor(.secondary)
                             }
                             Spacer()
-                            Text(formatDate(stage.date))
+                            Text(stage.formattedDate)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -190,10 +190,9 @@ struct EditApplicationView: View {
                     }
                     // Update date
                     DatePicker("Date", selection: Binding(
-                        get: { viewModel.tempStage.date.toDate() ?? Date() },
-                        set: { viewModel.tempStage.date = $0.toDateString() }
+                        get: { viewModel.tempStage.date.dateValue() },
+                        set: { viewModel.tempStage.date = Timestamp(date: $0) }
                     ), displayedComponents: .date)
-                    
                     // Additional notes
                     TextField("Additional notes (optional)", text: $viewModel.tempStage.note)
                     
@@ -274,12 +273,12 @@ struct EditApplicationView: View {
                 .lineLimit(3...6)
         }
     }
-    private func formatDate(_ dateString: String) -> String {
-        guard let date = dateString.toDate() else { return dateString }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
-        return formatter.string(from: date)
-    }
+//    private func formatDate(_ dateString: String) -> String {
+//        guard let date = dateString.toDate() else { return dateString }
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "MMM d, yyyy"
+//        return formatter.string(from: date)
+//    }
 }
 
 // MARK: - Preview

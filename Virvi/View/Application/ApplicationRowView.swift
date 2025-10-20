@@ -68,9 +68,10 @@ struct ApplicationRowView: View {
                         
                         Spacer()
                         
-                        Text(formatDate(applicationWithStages.application.date))
+                        Text(applicationWithStages.application.formattedDate)
                             .font(.caption)
                             .foregroundStyle(.tertiary)
+
                     }
                 }
                 // Dropdown arrow
@@ -249,10 +250,4 @@ struct ApplicationRowView: View {
         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
     
-    private func formatDate(_ dateString: String) -> String {
-        guard let date = dateString.toDate() else { return dateString }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
-        return formatter.string(from: date)
-    }
 }

@@ -289,7 +289,7 @@ class SyncManager: ObservableObject {
             if cloudApp.application.updatedAt.dateValue() > existingApp.updatedAt {
                 existingApp.role = cloudApp.application.role
                 existingApp.company = cloudApp.application.company
-                existingApp.date = cloudApp.application.date
+                existingApp.date = cloudApp.application.date.dateValue()
                 existingApp.status = cloudApp.application.status
                 existingApp.starred = cloudApp.application.starred
                 existingApp.note = cloudApp.application.note
@@ -342,7 +342,7 @@ class SyncManager: ObservableObject {
                 if cloudStage.updatedAt.dateValue() > existingStage.updatedAt {
                     existingStage.stage = cloudStage.stage
                     existingStage.status = cloudStage.status
-                    existingStage.date = cloudStage.date
+                    existingStage.date = cloudStage.date.dateValue()
                     existingStage.note = cloudStage.note
                     existingStage.sortOrder = cloudStage.sortOrder
                     existingStage.updatedAt = cloudStage.updatedAt.dateValue()
@@ -419,6 +419,32 @@ class SyncManager: ObservableObject {
     private func pushApplication(_ sdApp: SDApplication, userId: String) async throws {
         let application = sdApp.toApplication()
         
+        // 1️⃣ If the local app has no firestoreId, try to find a matching cloud app first
+        if sdApp.firestoreId == nil {
+            if let existingCloudApp = try await firestoreRepo.findApplication(
+                company: sdApp.company,
+                role: sdApp.role,
+                date: sdApp.date,
+                for: userId
+            ) {
+                // Assign Firestore ID to local app and skip creating a new document
+                sdApp.firestoreId = existingCloudApp.id
+                print("Linked local app to existing cloud app: \(sdApp.company)")
+                
+                // Optionally update local app with latest cloud data
+                if existingCloudApp.updatedAt.dateValue() > sdApp.updatedAt {
+                    sdApp.role = existingCloudApp.role
+                    sdApp.company = existingCloudApp.company
+                    sdApp.date = existingCloudApp.date.dateValue()
+                    sdApp.status = existingCloudApp.status
+                    sdApp.starred = existingCloudApp.starred
+                    sdApp.note = existingCloudApp.note
+                    sdApp.updatedAt = existingCloudApp.updatedAt.dateValue()
+                }
+            }
+        }
+        
+        // 2️⃣ Create or update in Firestore
         if let firestoreId = sdApp.firestoreId {
             // Update existing in Firestore
             try await firestoreRepo.updateApplication(application, for: userId)
@@ -430,14 +456,14 @@ class SyncManager: ObservableObject {
             print("Created new app in Firestore: \(sdApp.company) (ID: \(newId))")
         }
         
-        // Sync stages
+        // 3️⃣ Sync stages
         for sdStage in sdApp.stages ?? [] where !sdStage.isDeleted {
             if sdStage.needsSync {
                 try await pushStage(sdStage, applicationId: sdApp.firestoreId ?? sdApp.id, userId: userId)
             }
         }
         
-        // Also push deleted stages
+        // 4️⃣ Push deleted stages
         for sdStage in sdApp.stages ?? [] where sdStage.isDeleted {
             if sdStage.needsSync, let firestoreStageId = sdStage.firestoreId {
                 try await firestoreRepo.deleteStage(
@@ -452,9 +478,11 @@ class SyncManager: ObservableObject {
             }
         }
         
+        // 5️⃣ Mark application as synced
         sdApp.needsSync = false
         sdApp.lastSyncedAt = Date()
     }
+
     
     private func pushStage(_ sdStage: SDApplicationStage, applicationId: String, userId: String) async throws {
         let stage = sdStage.toApplicationStage()

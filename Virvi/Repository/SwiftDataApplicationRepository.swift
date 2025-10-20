@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseCore
 import SwiftData
 
 // MARK: - SwiftData Repository Implementation
@@ -43,7 +44,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         let sdApp = SDApplication(
             role: application.role,
             company: application.company,
-            date: application.date,
+            date: application.date.dateValue(),
             statusRawValue: application.status.rawValue,
             starred: application.starred,
             note: application.note,
@@ -75,7 +76,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         
         sdApp.role = application.role
         sdApp.company = application.company
-        sdApp.date = application.date
+        sdApp.date = application.date.dateValue()
         sdApp.status = application.status
         sdApp.starred = application.starred
         sdApp.note = application.note
@@ -165,7 +166,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         let sdStage = SDApplicationStage(
             stageRawValue: stage.stage.rawValue,
             statusRawValue: stage.status.rawValue,
-            date: stage.date,
+            date: stage.date.dateValue(),
             note: stage.note,
             sortOrder: stage.sortOrder,
             needsSync: true,
@@ -200,7 +201,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         
         sdStage.stage = stage.stage
         sdStage.status = stage.status
-        sdStage.date = stage.date
+        sdStage.date = stage.date.dateValue()
         sdStage.note = stage.note
         sdStage.sortOrder = stage.sortOrder
         sdStage.updatedAt = Date()
@@ -261,4 +262,21 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         try modelContext.save()
         await syncManager?.scheduleSync()
     }
+    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> Application? {
+        
+        let descriptor = FetchDescriptor<SDApplication>(
+            predicate: #Predicate { app in
+                app.company == company &&
+                app.role == role
+            },
+            sortBy: [SortDescriptor(\.date)]
+        )
+        
+        guard let sdApp = try modelContext.fetch(descriptor).first else {
+            return nil
+        }
+        
+        return sdApp.toApplication()
+    }
+
 }

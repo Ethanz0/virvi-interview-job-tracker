@@ -202,6 +202,27 @@ class FirestoreApplicationRepository: ApplicationRepository {
         }
         try await batch.commit()
     }
+    /// Find an existing application in Firestore matching company + role + date
+    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> Application? {
+        // Convert Swift Date to Firestore Timestamp
+        let timestamp = Timestamp(date: date)
+        
+        // Query Firestore for a matching application
+        let querySnapshot = try await db.collection("users")
+            .document(userId)
+            .collection("applications")
+            .whereField("company", isEqualTo: company)
+            .whereField("role", isEqualTo: role)
+            .whereField("date", isEqualTo: timestamp)
+            .limit(to: 1)
+            .getDocuments()
+        
+        // If we found a matching document, deserialize it
+        guard let doc = querySnapshot.documents.first else { return nil }
+        return try doc.data(as: Application.self)
+    }
+
+
 }
 
 // MARK: - Repository Errors

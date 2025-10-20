@@ -15,7 +15,7 @@ struct Application: Codable, Identifiable {
     @DocumentID var id: String?
     var role: String
     var company: String
-    var date: String
+    var date: Timestamp
     var status: ApplicationStatus
     var starred: Bool
     var note: String
@@ -38,7 +38,7 @@ struct Application: Codable, Identifiable {
         id: String? = nil,
         role: String,
         company: String,
-        date: String,
+        date: Timestamp = Timestamp(),
         status: ApplicationStatus,
         starred: Bool = false,
         note: String = "",
@@ -64,7 +64,7 @@ struct ApplicationStage: Codable, Identifiable {
     @DocumentID var id: String?
     var stage: StageType
     var status: StageStatus
-    var date: String
+    var date: Timestamp
     var note: String
     var sortOrder: Int
     let createdAt: Timestamp
@@ -85,7 +85,7 @@ struct ApplicationStage: Codable, Identifiable {
         id: String? = nil,
         stage: StageType,
         status: StageStatus,
-        date: String,
+        date: Timestamp = Timestamp(),
         note: String = "",
         sortOrder: Int = 0,
         createdAt: Timestamp = Timestamp(),
@@ -115,18 +115,28 @@ struct ApplicationWithStages: Identifiable {
 }
 
 
-extension Date {
-    func toDateString() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: self)
+//extension Date {
+//    func toDateString() -> String {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "yyyy-MM-dd"
+//        return formatter.string(from: self)
+//    }
+//}
+//
+//extension String {
+//    func toDate() -> Date? {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "yyyy-MM-dd"
+//        return formatter.date(from: self)
+//    }
+//}
+extension Application {
+    var formattedDate: String {
+        date.dateValue().formatted(date: .abbreviated, time: .omitted)
     }
 }
-
-extension String {
-    func toDate() -> Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.date(from: self)
+extension ApplicationStage {
+    var formattedDate: String {
+        date.dateValue().formatted(date: .abbreviated, time: .omitted)
     }
 }

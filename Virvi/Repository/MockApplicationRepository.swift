@@ -83,4 +83,15 @@ class MockApplicationRepository: ApplicationRepository {
         }
         applications[index].stages.removeAll()
     }
+    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> Application? {
+        // Look for an application in the array that matches the unique fields
+        if let appWithStages = applications.first(where: {
+            $0.application.company == company &&
+            $0.application.role == role &&
+            $0.application.date.dateValue() == date
+        }) {
+            return appWithStages.application
+        }
+        return nil
+    }
 }

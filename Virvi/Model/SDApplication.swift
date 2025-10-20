@@ -8,7 +8,7 @@ final class SDApplication {
     @Attribute(.unique) var id: String
     var role: String
     var company: String
-    var date: String
+    var date: Date
     var statusRawValue: String
     var starred: Bool
     var note: String
@@ -29,7 +29,7 @@ final class SDApplication {
         id: String = UUID().uuidString,
         role: String,
         company: String,
-        date: String,
+        date: Date = Date(),
         statusRawValue: String,
         starred: Bool = false,
         note: String = "",
@@ -67,7 +67,7 @@ final class SDApplication {
             id: firestoreId ?? id,
             role: role,
             company: company,
-            date: date,
+            date: Timestamp(date: date),
             status: status,
             starred: starred,
             note: note,
@@ -82,7 +82,7 @@ final class SDApplication {
             id: UUID().uuidString,
             role: app.role,
             company: app.company,
-            date: app.date,
+            date: app.date.dateValue(),
             statusRawValue: app.status.rawValue,
             starred: app.starred,
             note: app.note,
@@ -102,7 +102,7 @@ final class SDApplicationStage {
     @Attribute(.unique) var id: String
     var stageRawValue: String
     var statusRawValue: String
-    var date: String
+    var date: Date
     var note: String
     var sortOrder: Int
     var createdAt: Date
@@ -112,7 +112,7 @@ final class SDApplicationStage {
     var needsSync: Bool
     var lastSyncedAt: Date?
     var firestoreId: String?
-    var isDeleted: Bool  // NEW: Soft delete flag
+    var isDeleted: Bool
     
     // Relationship back to application
     var application: SDApplication?
@@ -121,7 +121,7 @@ final class SDApplicationStage {
         id: String = UUID().uuidString,
         stageRawValue: String,
         statusRawValue: String,
-        date: String,
+        date: Date = Date(),
         note: String = "",
         sortOrder: Int = 0,
         createdAt: Date = Date(),
@@ -162,7 +162,7 @@ final class SDApplicationStage {
             id: firestoreId ?? id,
             stage: stage,
             status: status,
-            date: date,
+            date: Timestamp(date: date),
             note: note,
             sortOrder: sortOrder,
             createdAt: Timestamp(date: createdAt),
@@ -176,7 +176,7 @@ final class SDApplicationStage {
             id: UUID().uuidString,
             stageRawValue: stage.stage.rawValue,
             statusRawValue: stage.status.rawValue,
-            date: stage.date,
+            date: stage.date.dateValue(),
             note: stage.note,
             sortOrder: stage.sortOrder,
             createdAt: stage.createdAt.dateValue(),

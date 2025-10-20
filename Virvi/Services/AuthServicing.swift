@@ -26,6 +26,7 @@ final class AuthService: AuthServicing {
     }
     
     /// Google Sign-In (v7) → Firebase credential
+    @MainActor
     func signInWithGoogle() async throws -> AppUser {
         // Get a presenting view controller for the Google sheet
         guard let presenter = Self.rootViewController else {
@@ -55,7 +56,7 @@ final class AuthService: AuthServicing {
     }
     
     // MARK: - Helpers
-    
+    @MainActor
     private static var rootViewController: UIViewController? {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }

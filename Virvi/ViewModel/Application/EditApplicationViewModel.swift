@@ -36,7 +36,7 @@ class EditApplicationViewModel: ObservableObject {
         id: nil,
         stage: StageType.applied,
         status: StageStatus.inProgress,
-        date: Date().toDateString(),
+        date: Timestamp(),
         note: "",
         sortOrder: 0
     )
@@ -73,7 +73,7 @@ class EditApplicationViewModel: ObservableObject {
             self.applicationId = appWithStages.application.id
             self.role = appWithStages.application.role
             self.company = appWithStages.application.company
-            self.date = appWithStages.application.date.toDate() ?? Date()
+            self.date = appWithStages.application.date.dateValue()
             self.status = appWithStages.application.status
             self.starred = appWithStages.application.starred
             self.note = appWithStages.application.note
@@ -105,7 +105,7 @@ class EditApplicationViewModel: ObservableObject {
             id: nil,
             stage: defaultStage,
             status: defaultStatus,
-            date: Date().toDateString(),
+            date: Timestamp(),
             note: "",
             sortOrder: stages.count
         )
@@ -146,7 +146,7 @@ class EditApplicationViewModel: ObservableObject {
             id: nil,
             stage: StageType.applied,
             status: StageStatus.inProgress,
-            date: Date().toDateString(),
+            date: Timestamp(),
             note: "",
             sortOrder: 0
         )
@@ -199,7 +199,7 @@ class EditApplicationViewModel: ObservableObject {
                 id: applicationId,
                 role: role.trimmingCharacters(in: .whitespaces),
                 company: company.trimmingCharacters(in: .whitespaces),
-                date: date.toDateString(),
+                date: Timestamp(date: date),
                 status: status,
                 starred: starred,
                 note: note.trimmingCharacters(in: .whitespaces)
