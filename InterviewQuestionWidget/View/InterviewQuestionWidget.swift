@@ -9,50 +9,46 @@
 import WidgetKit
 import SwiftUI
 
+// MARK: - Updated Widget Provider
+
+/// Replace your existing Provider with this
 struct Provider: TimelineProvider {
-    // Returns a example QuestionEntry for when in gallery
     func placeholder(in context: Context) -> QuestionEntry {
-        QuestionEntry(date: Date(), question: "What's your greatest technical achievement?")
+        QuestionEntry(
+            date: Date(),
+            question: "What's your greatest technical achievement?"
+        )
     }
-    // Preview of widget
+    
     func getSnapshot(in context: Context, completion: @escaping (QuestionEntry) -> ()) {
-        let entry = QuestionEntry(date: Date(), question: "Tell me about a time you solved a difficult problem.")
+        let entry = QuestionEntry(
+            date: Date(),
+            question: "Tell me about a time you solved a difficult problem."
+        )
         completion(entry)
     }
-
+    
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        Task {
-            // Get current date
-            let currentDate = Date()
-            // Default question in case something breaks
-            var question = "What's your approach to learning new technologies?"
-            
-            // Use gemini service to generate a question for the day
-            do {
-                let service = GeminiService()
-                question = try await service.generateQuestion()
-            } catch {
-                print("Failed to fetch question: \(error)")
-            }
-            // Create a new entry with the date and question
-            let entry = QuestionEntry(date: currentDate, question: question)
-            
-            // Refresh once per day
-            let nextUpdate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
-            // Create the timeline with one entry, and the refresh policy
-            let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
-            // Provide timeline to widgetKit
-            completion(timeline)
-        }
+        // Simply read from cache - no API calls needed!
+        let question = SharedQuestionCache.getDailyQuestion()
+                      ?? "Open Virvi to see today's question"
+        
+        let currentDate = Date()
+        let entry = QuestionEntry(date: currentDate, question: question)
+        
+        // Refresh at midnight tomorrow
+        let midnight = Calendar.current.startOfDay(for: currentDate)
+        let nextMidnight = Calendar.current.date(byAdding: .day, value: 1, to: midnight)!
+        
+        let timeline = Timeline(entries: [entry], policy: .after(nextMidnight))
+        completion(timeline)
     }
 }
-
 
 
 /// This view is for the widget to display the question of the day and the current day
 struct InterviewQuestionWidgetEntryView : View {
     var entry: Provider.Entry
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Question of the Day")
@@ -81,10 +77,8 @@ struct InterviewQuestionWidgetEntryView : View {
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
-
 struct InterviewQuestionWidget: Widget {
     let kind: String = "InterviewQuestionWidget"
-
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             InterviewQuestionWidgetEntryView(entry: entry)

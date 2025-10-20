@@ -1,4 +1,5 @@
 import SwiftUI
+import BackgroundTasks
 import SwiftData
 
 enum InterviewDestination: Hashable {
@@ -15,7 +16,8 @@ struct ContentView: View {
     @State private var interviewPath = NavigationPath()
     @State private var syncManager: SyncManager?
     @State private var formResetTrigger = UUID()
-    
+    @State private var questionService = QuestionUpdateService()
+
     private var applicationRepository: ApplicationRepository {
         SwiftDataApplicationRepository(
             modelContext: modelContext,
@@ -92,6 +94,10 @@ struct ContentView: View {
 
                 }
             }
+            scheduleBackgroundTask()
+        }
+        .task {
+            await questionService.updateQuestionIfNeeded()
         }
         .onChange(of: auth.user) { oldUser, newUser in
             Task{
@@ -99,7 +105,17 @@ struct ContentView: View {
             }
         }
     }
-    
+    private func scheduleBackgroundTask() {
+        let request = BGAppRefreshTaskRequest(identifier: "com.virvi.app.refresh-question")
+        request.earliestBeginDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+            print("✅ Background task scheduled successfully")
+        } catch {
+            print("❌ Failed to schedule: \(error)")
+        }
+    }
     private func resetInterviewForm() {
         formResetTrigger = UUID()
     }
