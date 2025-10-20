@@ -2,14 +2,6 @@
 //  DynamicInterviewStrategy.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 20/10/2025.
-//
-
-
-//
-//  DynamicInterviewStrategy.swift
-//  Virvi
-//
 //  Strategy for handling AI-generated dynamic interview questions
 //
 
@@ -25,11 +17,12 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
     @Published var isProcessingAnswer: Bool = false
     @Published var errorMessage: String?
     @Published private var interviewCompleted: Bool = false
+    @Published var feedbackMessage: String?
     
     private let ai = FirebaseAI.firebaseAI(backend: .googleAI())
     private var chat: Chat?
     private var interview: Interview?
-    private var modelContext: ModelContext?
+    private var repository: InterviewRepositoryProtocol?
     private var maxQuestions: Int = 10
     private var duration: Int = 60
     
@@ -59,16 +52,14 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
     5. Each question should be concise (1-2 sentences maximum)
     6. Do not repeat similar questions
     7. Progress naturally through different aspects: experience, skills, scenarios, culture fit
-    8. Every 2 or 3 question, ensure to move on to a new question that is irrelevant the the candidate's answers.
-    9. Once the user is on their second last question, provide feedback. e.g if Maximum questions is 3, provide the feedback on the third question. 
-    10. Ignore 9 if there is only 1 question
+    8. Every 2 or 3 questions, ensure to move on to a new topic that is not directly related to the candidate's previous answers
     
     Response format: Return ONLY the next interview question as plain text. No preambles, explanations, or formatting.
     """
     
     func setup(with interview: Interview, modelContext: ModelContext) {
         self.interview = interview
-        self.modelContext = modelContext
+        self.repository = SwiftDataInterviewRepository(modelContext: modelContext)
         self.maxQuestions = interview.maxQuestions ?? 10
         self.duration = interview.duration
         
@@ -115,7 +106,7 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
                 currentQuestion = question
                 allQuestions.append(question)
                 interview?.questions.append(question)
-                try? modelContext?.save()
+                try? repository?.saveContext()
             }
             
         } catch {
@@ -132,13 +123,14 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
         errorMessage = nil
         
         currentQuestion.transcript = transcript
-        if let videoURL = videoURL {
-            currentQuestion.recordingPath = videoURL.path
-        }
+        currentQuestion.recordingURL = videoURL
         
-        try? modelContext?.save()
+        try? repository?.saveContext()
         
+        // Check if this was the last question
         if allQuestions.count >= maxQuestions {
+            // Generate final feedback instead of another question
+            await generateFinalFeedback()
             endInterview()
             isProcessingAnswer = false
             return
@@ -177,7 +169,7 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
                 allQuestions.append(nextQuestion)
                 interview?.questions.append(nextQuestion)
                 
-                try? modelContext?.save()
+                try? repository?.saveContext()
             }
             
         } catch {
@@ -187,10 +179,48 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
         isGeneratingQuestion = false
     }
     
+    private func generateFinalFeedback() async {
+        isGeneratingQuestion = true
+        errorMessage = nil
+        
+        do {
+            guard let chat = chat else {
+                throw NSError(domain: "DynamicInterview", code: -1,
+                              userInfo: [NSLocalizedDescriptionKey: "Chat not initialized"])
+            }
+            
+            let feedbackPrompt = """
+            The interview is now complete. Please provide constructive feedback on the candidate's overall performance.
+            
+            Include:
+            1. Key strengths demonstrated
+            2. Areas for improvement
+            3. Overall impression
+            
+            Keep the feedback concise (2-3 short paragraphs, each under 50 words) and professional.
+            """
+            
+            let response = try await chat.sendMessage(feedbackPrompt)
+            
+            if let feedback = response.text?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                feedbackMessage = feedback
+                
+                // Store feedback directly on the interview object
+                interview?.feedback = feedback
+                try? repository?.saveContext()
+            }
+            
+        } catch {
+            errorMessage = "Failed to generate feedback: \(error.localizedDescription)"
+        }
+        
+        isGeneratingQuestion = false
+    }
+    
     func endInterview() {
         interviewCompleted = true
         interview?.completed = true
         interview?.completionDate = Date()
-        try? modelContext?.save()
+        try? repository?.saveContext()
     }
 }

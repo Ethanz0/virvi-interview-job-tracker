@@ -18,6 +18,7 @@ class Interview {
     var completionDate: Date?
     var additionalContext: String?
     var maxQuestions: Int?
+    var feedback: String?
     @Relationship(deleteRule: .cascade)
     var questions: [Question]
     
@@ -44,7 +45,7 @@ class Question {
     var question: String
     var order: Int
     var transcript: String?
-    var recordingPath: String?
+    var recordingURL: URL?
     
     init(question: String, order: Int) {
         self.id = UUID()

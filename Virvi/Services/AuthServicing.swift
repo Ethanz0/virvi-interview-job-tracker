@@ -1,10 +1,3 @@
-//
-//  AuthServicing.swift
-//  Virvi
-//
-//  Created by Ethan Zhang on 2/10/2025.
-//
-
 import Foundation
 import FirebaseAuth
 import FirebaseCore
@@ -15,6 +8,7 @@ protocol AuthServicing {
     var currentUser: AppUser? { get }
     func signInWithGoogle() async throws -> AppUser
     func signOut() throws
+    func deleteAccount() async throws
 }
 
 final class AuthService: AuthServicing {
@@ -55,6 +49,18 @@ final class AuthService: AuthServicing {
         GIDSignIn.sharedInstance.signOut()
     }
     
+    func deleteAccount() async throws {
+        guard let user = auth.currentUser else {
+            throw AuthError.misconfigured("No user is currently signed in")
+        }
+        
+        // Attempt to delete the Firebase Auth account
+        try await user.delete()
+        
+        // Also sign out from Google
+        GIDSignIn.sharedInstance.signOut()
+    }
+    
     // MARK: - Helpers
     @MainActor
     private static var rootViewController: UIViewController? {
@@ -76,6 +82,7 @@ final class AuthService: AuthServicing {
         }
     }
 }
+
 // MARK: - Mock Auth Service for Previews
 class MockAuthService: AuthServicing {
     var currentUser: AppUser? = AppUser(
@@ -97,6 +104,11 @@ class MockAuthService: AuthServicing {
     
     func signOut() throws {
         // Simulate sign out
+        currentUser = nil
+    }
+    
+    func deleteAccount() async throws {
+        // Simulate account deletion
         currentUser = nil
     }
 }

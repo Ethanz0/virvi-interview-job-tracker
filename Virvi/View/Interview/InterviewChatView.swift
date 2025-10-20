@@ -1,8 +1,8 @@
 //
-//  VideoPlayerView.swift
+//  InterviewChatView.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 8/10/2025.
+//  Updated to show feedback in dynamic mode
 //
 
 import SwiftUI
@@ -10,7 +10,6 @@ import SwiftData
 import AVFoundation
 import AVKit
 
-// MARK: - Video Player View
 struct VideoPlayerView: View {
     let videoURL: URL
     @Environment(\.dismiss) var dismiss
@@ -76,6 +75,11 @@ struct InterviewChatView: View {
                                 showAnswer: isReviewMode || question.transcript != nil
                             )
                             .id(question.id)
+                        }
+                        
+                        // Show feedback if available (for both review and completed interviews)
+                        if let feedback = viewModel.feedbackMessage {
+                            FeedbackBubble(feedback: feedback)
                         }
                     }
                 }
@@ -160,29 +164,39 @@ struct InterviewChatView: View {
                     
             } else if !viewModel.hasMoreQuestions {
                 VStack(spacing: 12) {
-                    Text("Interview Complete!")
-                        .font(.headline)
-                        .foregroundColor(.green)
-                    
-                    Button(action: {
-                        dismiss()
-                        onComplete?()
-                        if let path = path {
-                            path.wrappedValue = NavigationPath()
-                        }
-                    }) {
-                        HStack {
-                            Spacer()
-                            Text("Done")
+                    if viewModel.isGeneratingQuestion {
+                        VStack(spacing: 8) {
+                            ProgressView()
+                            Text("Generating feedback...")
                                 .font(.headline)
-                                .foregroundColor(.white)
-                            Spacer()
+                                .foregroundColor(.secondary)
                         }
                         .padding()
-                        .background(Color.green)
-                        .cornerRadius(12)
+                    } else {
+                        Text("Interview Complete!")
+                            .font(.headline)
+                            .foregroundColor(.green)
+                        
+                        Button(action: {
+                            dismiss()
+                            onComplete?()
+                            if let path = path {
+                                path.wrappedValue = NavigationPath()
+                            }
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text("Done")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Spacer()
+                            }
+                            .padding()
+                            .background(Color.green)
+                            .cornerRadius(12)
+                        }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 }
             }
         }
@@ -247,5 +261,41 @@ struct InterviewChatView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+    }
+}
+
+struct FeedbackBubble: View {
+    let feedback: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "star.circle.fill")
+                    .foregroundColor(.yellow)
+                    .font(.title2)
+                Text("Interview Feedback")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
+            
+            Divider()
+            
+            Text(feedback)
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+                .font(.body)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.yellow.opacity(0.5), lineWidth: 2)
+        )
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 }

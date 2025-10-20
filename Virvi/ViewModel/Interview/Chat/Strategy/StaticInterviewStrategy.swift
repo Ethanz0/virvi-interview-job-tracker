@@ -2,14 +2,6 @@
 //  StaticInterviewStrategy.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 20/10/2025.
-//
-
-
-//
-//  StaticInterviewStrategy.swift
-//  Virvi
-//
 //  Strategy for handling static (pre-defined) interview questions
 //
 
@@ -22,7 +14,7 @@ class StaticInterviewStrategy: InterviewStrategy, ObservableObject {
     @Published var isProcessingAnswer: Bool = false
     
     private var interview: Interview?
-    private var modelContext: ModelContext?
+    private var repository: InterviewRepositoryProtocol?
     private var questions: [Question] = []
     
     var isGeneratingQuestion: Bool { false }
@@ -50,7 +42,7 @@ class StaticInterviewStrategy: InterviewStrategy, ObservableObject {
     
     func setup(with interview: Interview, modelContext: ModelContext) {
         self.interview = interview
-        self.modelContext = modelContext
+        self.repository = SwiftDataInterviewRepository(modelContext: modelContext)
         self.questions = interview.questions.sorted { $0.order < $1.order }
         self.currentQuestionIndex = 0
     }
@@ -60,7 +52,7 @@ class StaticInterviewStrategy: InterviewStrategy, ObservableObject {
         
         let currentQuestion = questions[currentQuestionIndex]
         currentQuestion.transcript = transcript.isEmpty ? "" : transcript
-        currentQuestion.recordingPath = videoURL?.path
+        currentQuestion.recordingURL = videoURL
         
         currentQuestionIndex += 1
         
@@ -68,12 +60,13 @@ class StaticInterviewStrategy: InterviewStrategy, ObservableObject {
             endInterview()
         }
         
+        try? repository?.saveContext()
         isProcessingAnswer = false
     }
     
     func endInterview() {
         interview?.completed = true
         interview?.completionDate = Date()
-        try? modelContext?.save()
+        try? repository?.saveContext()
     }
 }

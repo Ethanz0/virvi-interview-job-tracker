@@ -2,14 +2,7 @@
 //  InterviewFormViewModel.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 6/10/2025.
-//
-
-//
-//  InterviewFormViewModel.swift
-//  Virvi
-//
-//  Updated to support form reset
+//  Updated to use repository pattern
 //
 
 import Foundation
@@ -26,11 +19,11 @@ class InterviewFormViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var questionMode: QuestionMode = QuestionMode.manual
     
-    private var modelContext: ModelContext?
+    private var repository: InterviewRepositoryProtocol?
     private let geminiService = GeminiService()
     
     func setup(with modelContext: ModelContext) {
-        self.modelContext = modelContext
+        self.repository = SwiftDataInterviewRepository(modelContext: modelContext)
     }
     
     func resetForm() {
@@ -46,8 +39,8 @@ class InterviewFormViewModel: ObservableObject {
     
     @MainActor
     func createInterview() async -> Interview? {
-        guard let modelContext = modelContext else {
-            errorMessage = "Model context not initialized"
+        guard let repository = repository else {
+            errorMessage = "Repository not initialized"
             showError = true
             return nil
         }
@@ -87,10 +80,8 @@ class InterviewFormViewModel: ObservableObject {
             }
         }
 
-        modelContext.insert(newInterview)
-        
         do {
-            try modelContext.save()
+            try repository.create(interview: newInterview)
             return newInterview
         } catch {
             await MainActor.run {

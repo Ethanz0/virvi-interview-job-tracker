@@ -2,14 +2,13 @@
 //  QuestionBubble.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 6/10/2025.
+//  Updated to use URL type for video
 //
 
 import SwiftUI
 import Foundation
 import AVKit
 
-/// This struct is responsible for the UI of the question bubbles and video player thumbnails
 struct QuestionBubble: View {
     let question: Question
     let showAnswer: Bool
@@ -41,14 +40,10 @@ struct QuestionBubble: View {
                     VStack(alignment: .trailing, spacing: 4) {
                         VStack(alignment: .leading, spacing: 8) {
                             // Video thumbnail if available
-                            if let recordingPath = question.recordingPath {
-                                let videoURL = URL(fileURLWithPath: recordingPath)
-                                // MARK: - Video Thumbnail
-                                // Button which brings up videoplayerview
+                            if let videoURL = question.recordingURL {
                                 Button {
                                     showingVideoPlayer = true
                                 } label: {
-                                    // Zstack for thumbnail with play button on top
                                     ZStack {
                                         if let thumbnail = thumbnail {
                                             Image(uiImage: thumbnail)
@@ -69,16 +64,14 @@ struct QuestionBubble: View {
                                     }
                                     .frame(maxWidth: 200)
                                 }
-                                // Generate thumbnail when this view loads
                                 .onAppear {
                                     generateThumbnail(for: videoURL)
                                 }
-                                // If thumbnail pressed, show videoplayer for videoURL
                                 .sheet(isPresented: $showingVideoPlayer) {
                                     VideoPlayerView(videoURL: videoURL)
                                 }
                             }
-                            // MARK: - Transcript
+                            
                             Text(transcript)
                                 .foregroundColor(.white)
                         }
@@ -93,12 +86,10 @@ struct QuestionBubble: View {
             }
         }
     }
-    // MARK: - Generate thumbnail
-    // Generate a video thumbnail from the video URL
+    
     private func generateThumbnail(for url: URL) {
         let asset = AVURLAsset(url: url)
         asset.generateThumbnail { image in
-            // We need to use dispatch queue, because generate thumbnail uses old tech
             DispatchQueue.main.async {
                 self.thumbnail = image
             }

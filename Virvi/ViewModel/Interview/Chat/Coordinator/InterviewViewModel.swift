@@ -2,7 +2,7 @@
 //  InterviewViewModel.swift
 //  Virvi
 //
-//  Refactored to use InterviewStrategy protocol
+//  Updated to expose feedback message
 //
 
 import SwiftUI
@@ -22,7 +22,6 @@ class InterviewViewModel: ObservableObject {
     
     var videoVM = VideoViewModel()
     
-    // Delegate to strategy
     var hasMoreQuestions: Bool {
         strategy?.hasMoreQuestions ?? false
     }
@@ -59,15 +58,25 @@ class InterviewViewModel: ObservableObject {
         strategy?.answeredQuestions ?? 0
     }
     
+    var feedbackMessage: String? {
+        // First check if the interview itself has feedback stored
+        if let feedback = interview?.feedback {
+            return feedback
+        }
+        // Otherwise check the dynamic strategy's current feedback
+        if let dynamicStrategy = strategy as? DynamicInterviewStrategy {
+            return dynamicStrategy.feedbackMessage
+        }
+        return nil
+    }
+    
     func setup(with interview: Interview, modelContext: ModelContext, isDynamicMode: Bool = false) {
         self.interview = interview
         self.modelContext = modelContext
         
-        // Create appropriate strategy
         if isDynamicMode {
             let dynamicStrategy = DynamicInterviewStrategy()
             
-            // Subscribe to strategy changes
             dynamicStrategy.objectWillChange.sink { [weak self] _ in
                 self?.objectWillChange.send()
             }.store(in: &cancellables)
@@ -76,7 +85,6 @@ class InterviewViewModel: ObservableObject {
         } else {
             let staticStrategy = StaticInterviewStrategy()
             
-            // Subscribe to strategy changes
             staticStrategy.objectWillChange.sink { [weak self] _ in
                 self?.objectWillChange.send()
             }.store(in: &cancellables)
