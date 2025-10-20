@@ -1,22 +1,21 @@
 import Foundation
-import FirebaseCore
 import SwiftData
 
-// MARK: - SwiftData Repository Implementation
+/// SwiftData-based repository implementation
+/// This is the primary repository used throughout the app
+@MainActor
 class SwiftDataApplicationRepository: ApplicationRepository {
-    private weak var syncManager: SyncManager?
-
     private let modelContext: ModelContext
+    private weak var syncManager: SyncManager?
     
-    init(modelContext: ModelContext, syncManager: SyncManager?) {
+    init(modelContext: ModelContext, syncManager: SyncManager? = nil) {
         self.modelContext = modelContext
         self.syncManager = syncManager
     }
     
     // MARK: - Application CRUD
     
-    func fetchApplications(for userId: String) async throws -> [ApplicationWithStages] {
-        // Only fetch non-deleted applications
+    func fetchApplications() async throws -> [ApplicationWithStages] {
         let descriptor = FetchDescriptor<SDApplication>(
             predicate: #Predicate { app in
                 app.isDeleted == false
@@ -27,232 +26,147 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         let applications = try modelContext.fetch(descriptor)
         
         return applications.map { sdApp in
-            // Only include non-deleted stages
             let stages = (sdApp.stages ?? [])
                 .filter { !$0.isDeleted }
                 .sorted(by: { $0.sortOrder < $1.sortOrder })
-                .map { $0.toApplicationStage() }
             
             return ApplicationWithStages(
-                application: sdApp.toApplication(),
+                application: sdApp,
                 stages: stages
             )
         }
     }
     
-    func createApplication(_ application: Application, for userId: String) async throws -> String {
+    func createApplication(
+        role: String,
+        company: String,
+        date: Date,
+        status: ApplicationStatus,
+        starred: Bool,
+        note: String
+    ) async throws -> SDApplication {
         let sdApp = SDApplication(
-            role: application.role,
-            company: application.company,
-            date: application.date.dateValue(),
-            statusRawValue: application.status.rawValue,
-            starred: application.starred,
-            note: application.note,
+            role: role,
+            company: company,
+            date: date,
+            statusRawValue: status.rawValue,
+            starred: starred,
+            note: note,
             needsSync: true,
             isDeleted: false
         )
         
         modelContext.insert(sdApp)
         try modelContext.save()
-        await syncManager?.scheduleSync()
-        return sdApp.id
+        
+        // Trigger sync in background
+        syncManager?.scheduleSync()
+        
+        return sdApp
     }
     
-    func updateApplication(_ application: Application, for userId: String) async throws {
-        guard let id = application.id else {
-            throw RepositoryError.missingId
-        }
-        
-        // Find by either local id or firestore id
-        let descriptor = FetchDescriptor<SDApplication>(
-            predicate: #Predicate { app in
-                (app.id == id || app.firestoreId == id) && app.isDeleted == false
-            }
-        )
-        
-        guard let sdApp = try modelContext.fetch(descriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
-        sdApp.role = application.role
-        sdApp.company = application.company
-        sdApp.date = application.date.dateValue()
-        sdApp.status = application.status
-        sdApp.starred = application.starred
-        sdApp.note = application.note
-        sdApp.updatedAt = Date()
-        sdApp.needsSync = true
+    func updateApplication(_ application: SDApplication) async throws {
+        application.updatedAt = Date()
+        application.needsSync = true
         
         try modelContext.save()
-        await syncManager?.scheduleSync()
+        syncManager?.scheduleSync()
     }
     
-    func deleteApplication(id: String, for userId: String) async throws {
-        let descriptor = FetchDescriptor<SDApplication>(
-            predicate: #Predicate { app in
-                app.id == id || app.firestoreId == id
-            }
-        )
+    func deleteApplication(_ application: SDApplication) async throws {
+        // Soft delete
+        application.isDeleted = true
+        application.updatedAt = Date()
+        application.needsSync = true
         
-        guard let sdApp = try modelContext.fetch(descriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
-        // Soft delete: mark as deleted instead of actually deleting
-        sdApp.isDeleted = true
-        sdApp.updatedAt = Date()
-        sdApp.needsSync = true
-        
-        // Also mark all stages as deleted
-        for stage in sdApp.stages ?? [] {
+        // Also soft delete all stages
+        for stage in application.stages ?? [] {
             stage.isDeleted = true
             stage.updatedAt = Date()
             stage.needsSync = true
         }
         
         try modelContext.save()
-        await syncManager?.scheduleSync()
+        syncManager?.scheduleSync()
     }
     
-    func toggleStar(applicationId: String, for userId: String) async throws {
-        let descriptor = FetchDescriptor<SDApplication>(
-            predicate: #Predicate { app in
-                (app.id == applicationId || app.firestoreId == applicationId) && app.isDeleted == false
-            }
-        )
-        
-        guard let sdApp = try modelContext.fetch(descriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
-        sdApp.starred.toggle()
-        sdApp.updatedAt = Date()
-        sdApp.needsSync = true
+    func toggleStar(_ application: SDApplication) async throws {
+        application.starred.toggle()
+        application.updatedAt = Date()
+        application.needsSync = true
         
         try modelContext.save()
-        await syncManager?.scheduleSync()
+        syncManager?.scheduleSync()
     }
     
     // MARK: - Stage CRUD
     
-    func fetchStages(for applicationId: String, userId: String) async throws -> [ApplicationStage] {
-        let descriptor = FetchDescriptor<SDApplication>(
-            predicate: #Predicate { app in
-                (app.id == applicationId || app.firestoreId == applicationId) && app.isDeleted == false
-            }
-        )
-        
-        guard let sdApp = try modelContext.fetch(descriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
-        return (sdApp.stages ?? [])
+    func fetchStages(for application: SDApplication) async throws -> [SDApplicationStage] {
+        return (application.stages ?? [])
             .filter { !$0.isDeleted }
             .sorted(by: { $0.sortOrder < $1.sortOrder })
-            .map { $0.toApplicationStage() }
     }
     
-    func createStage(_ stage: ApplicationStage, for applicationId: String, userId: String) async throws -> String {
-        let descriptor = FetchDescriptor<SDApplication>(
-            predicate: #Predicate { app in
-                (app.id == applicationId || app.firestoreId == applicationId) && app.isDeleted == false
-            }
-        )
-        
-        guard let sdApp = try modelContext.fetch(descriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
+    func createStage(
+        for application: SDApplication,
+        stage: StageType,
+        status: StageStatus,
+        date: Date,
+        note: String,
+        sortOrder: Int
+    ) async throws -> SDApplicationStage {
         let sdStage = SDApplicationStage(
-            stageRawValue: stage.stage.rawValue,
-            statusRawValue: stage.status.rawValue,
-            date: stage.date.dateValue(),
-            note: stage.note,
-            sortOrder: stage.sortOrder,
+            stageRawValue: stage.rawValue,
+            statusRawValue: status.rawValue,
+            date: date,
+            note: note,
+            sortOrder: sortOrder,
             needsSync: true,
             isDeleted: false
         )
         
-        sdStage.application = sdApp
+        sdStage.application = application
         modelContext.insert(sdStage)
         
-        sdApp.updatedAt = Date()
-        sdApp.needsSync = true
+        application.updatedAt = Date()
+        application.needsSync = true
         
         try modelContext.save()
-        await syncManager?.scheduleSync()
-        return sdStage.id
+        syncManager?.scheduleSync()
+        
+        return sdStage
     }
     
-    func updateStage(_ stage: ApplicationStage, for applicationId: String, userId: String) async throws {
-        guard let id = stage.id else {
-            throw RepositoryError.missingId
-        }
+    func updateStage(_ stage: SDApplicationStage) async throws {
+        stage.updatedAt = Date()
+        stage.needsSync = true
         
-        let descriptor = FetchDescriptor<SDApplicationStage>(
-            predicate: #Predicate { s in
-                (s.id == id || s.firestoreId == id) && s.isDeleted == false
-            }
-        )
-        
-        guard let sdStage = try modelContext.fetch(descriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
-        sdStage.stage = stage.stage
-        sdStage.status = stage.status
-        sdStage.date = stage.date.dateValue()
-        sdStage.note = stage.note
-        sdStage.sortOrder = stage.sortOrder
-        sdStage.updatedAt = Date()
-        sdStage.needsSync = true
-        
-        if let app = sdStage.application {
+        if let app = stage.application {
             app.updatedAt = Date()
             app.needsSync = true
         }
         
         try modelContext.save()
-        await syncManager?.scheduleSync()
+        syncManager?.scheduleSync()
     }
     
-    func deleteStage(id: String, for applicationId: String, userId: String) async throws {
-        let descriptor = FetchDescriptor<SDApplicationStage>(
-            predicate: #Predicate { s in
-                s.id == id || s.firestoreId == id
-            }
-        )
-        
-        guard let sdStage = try modelContext.fetch(descriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
+    func deleteStage(_ stage: SDApplicationStage) async throws {
         // Soft delete
-        sdStage.isDeleted = true
-        sdStage.updatedAt = Date()
-        sdStage.needsSync = true
+        stage.isDeleted = true
+        stage.updatedAt = Date()
+        stage.needsSync = true
         
-        if let app = sdStage.application {
+        if let app = stage.application {
             app.updatedAt = Date()
             app.needsSync = true
         }
         
         try modelContext.save()
-        await syncManager?.scheduleSync()
+        syncManager?.scheduleSync()
     }
     
-    func deleteAllStages(for applicationId: String, userId: String) async throws {
-        let appDescriptor = FetchDescriptor<SDApplication>(
-            predicate: #Predicate { app in
-                (app.id == applicationId || app.firestoreId == applicationId) && app.isDeleted == false
-            }
-        )
-        
-        guard let sdApp = try modelContext.fetch(appDescriptor).first else {
-            throw RepositoryError.notFound
-        }
-        
-        let stages = sdApp.stages ?? []
+    func deleteAllStages(for application: SDApplication) async throws {
+        let stages = application.stages ?? []
         for stage in stages {
             stage.isDeleted = true
             stage.updatedAt = Date()
@@ -260,23 +174,28 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         }
         
         try modelContext.save()
-        await syncManager?.scheduleSync()
+        syncManager?.scheduleSync()
     }
-    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> Application? {
-        
-        let descriptor = FetchDescriptor<SDApplication>(
-            predicate: #Predicate { app in
-                app.company == company &&
-                app.role == role
-            },
-            sortBy: [SortDescriptor(\.date)]
-        )
-        
-        guard let sdApp = try modelContext.fetch(descriptor).first else {
-            return nil
-        }
-        
-        return sdApp.toApplication()
-    }
+}
 
+// MARK: - Repository Errors
+
+enum RepositoryError: LocalizedError {
+    case notFound
+    case missingId
+    case invalidData
+    case unauthorized
+    
+    var errorDescription: String? {
+        switch self {
+        case .notFound:
+            return "The requested item was not found."
+        case .missingId:
+            return "Item is missing an ID."
+        case .invalidData:
+            return "The data is invalid or corrupted."
+        case .unauthorized:
+            return "You don't have permission to perform this action."
+        }
+    }
 }

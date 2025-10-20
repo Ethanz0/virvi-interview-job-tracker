@@ -1,70 +1,74 @@
 import Foundation
-import FirebaseCore
 import SwiftData
+import FirebaseFirestore
 
-// MARK: - SwiftData Application Model
 @Model
 final class SDApplication {
+    // Local identifier (SwiftData's persistent ID)
     @Attribute(.unique) var id: String
+    
+    // Firestore document ID (set after syncing)
+    var firestoreId: String?
+    
+    // Application data
     var role: String
     var company: String
     var date: Date
     var statusRawValue: String
     var starred: Bool
     var note: String
+    
+    // Metadata
     var createdAt: Date
     var updatedAt: Date
     
-    // Sync metadata
+    // Sync tracking
     var needsSync: Bool
+    var isDeleted: Bool
     var lastSyncedAt: Date?
-    var firestoreId: String?
-    var isDeleted: Bool  // NEW: Soft delete flag
     
-    // Relationship to stages
+    // Relationships
     @Relationship(deleteRule: .cascade, inverse: \SDApplicationStage.application)
     var stages: [SDApplicationStage]?
     
+    // Computed property for status
+    var status: ApplicationStatus {
+        get { ApplicationStatus(rawValue: statusRawValue) ?? .notApplied }
+        set { statusRawValue = newValue.rawValue }
+    }
+    
+    // Formatted date helper
+    var formattedDate: String {
+        date.formatted(date: .abbreviated, time: .omitted)
+    }
+    
     init(
-        id: String = UUID().uuidString,
         role: String,
         company: String,
-        date: Date = Date(),
+        date: Date,
         statusRawValue: String,
         starred: Bool = false,
         note: String = "",
-        createdAt: Date = Date(),
-        updatedAt: Date = Date(),
         needsSync: Bool = true,
-        lastSyncedAt: Date? = nil,
-        firestoreId: String? = nil,
         isDeleted: Bool = false
     ) {
-        self.id = id
+        self.id = UUID().uuidString
         self.role = role
         self.company = company
         self.date = date
         self.statusRawValue = statusRawValue
         self.starred = starred
         self.note = note
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
+        self.createdAt = Date()
+        self.updatedAt = Date()
         self.needsSync = needsSync
-        self.lastSyncedAt = lastSyncedAt
-        self.firestoreId = firestoreId
         self.isDeleted = isDeleted
     }
     
-    // Computed property for ApplicationStatus
-    var status: ApplicationStatus {
-        get { ApplicationStatus(rawValue: statusRawValue) ?? .notApplied }
-        set { statusRawValue = newValue.rawValue }
-    }
-    
-    // Convert to your existing Application model
-    func toApplication() -> Application {
-        Application(
-            id: firestoreId ?? id,
+    // Convert to Firestore model for syncing
+    func toFSApplication() -> FSApplication {
+        FSApplication(
+            id: firestoreId,
             role: role,
             company: company,
             date: Timestamp(date: date),
@@ -76,76 +80,46 @@ final class SDApplication {
         )
     }
     
-    // Create from your existing Application model
-    static func from(_ app: Application) -> SDApplication {
-        SDApplication(
-            id: UUID().uuidString,
-            role: app.role,
-            company: app.company,
-            date: app.date.dateValue(),
-            statusRawValue: app.status.rawValue,
-            starred: app.starred,
-            note: app.note,
-            createdAt: app.createdAt.dateValue(),
-            updatedAt: app.updatedAt.dateValue(),
+    // Create from Firestore model
+    static func from(_ fsApp: FSApplication) -> SDApplication {
+        let app = SDApplication(
+            role: fsApp.role,
+            company: fsApp.company,
+            date: fsApp.date.dateValue(),
+            statusRawValue: fsApp.status.rawValue,
+            starred: fsApp.starred,
+            note: fsApp.note,
             needsSync: false,
-            lastSyncedAt: Date(),
-            firestoreId: app.id,
             isDeleted: false
         )
+        app.firestoreId = fsApp.id
+        app.createdAt = fsApp.createdAt.dateValue()
+        app.updatedAt = fsApp.updatedAt.dateValue()
+        return app
     }
 }
 
-// MARK: - SwiftData ApplicationStage Model
 @Model
 final class SDApplicationStage {
     @Attribute(.unique) var id: String
+    var firestoreId: String?
+    
     var stageRawValue: String
     var statusRawValue: String
     var date: Date
     var note: String
     var sortOrder: Int
+    
     var createdAt: Date
     var updatedAt: Date
     
-    // Sync metadata
     var needsSync: Bool
-    var lastSyncedAt: Date?
-    var firestoreId: String?
     var isDeleted: Bool
+    var lastSyncedAt: Date?
     
-    // Relationship back to application
+    @Relationship
     var application: SDApplication?
     
-    init(
-        id: String = UUID().uuidString,
-        stageRawValue: String,
-        statusRawValue: String,
-        date: Date = Date(),
-        note: String = "",
-        sortOrder: Int = 0,
-        createdAt: Date = Date(),
-        updatedAt: Date = Date(),
-        needsSync: Bool = true,
-        lastSyncedAt: Date? = nil,
-        firestoreId: String? = nil,
-        isDeleted: Bool = false
-    ) {
-        self.id = id
-        self.stageRawValue = stageRawValue
-        self.statusRawValue = statusRawValue
-        self.date = date
-        self.note = note
-        self.sortOrder = sortOrder
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.needsSync = needsSync
-        self.lastSyncedAt = lastSyncedAt
-        self.firestoreId = firestoreId
-        self.isDeleted = isDeleted
-    }
-    
-    // Computed properties
     var stage: StageType {
         get { StageType(rawValue: stageRawValue) ?? .applied }
         set { stageRawValue = newValue.rawValue }
@@ -156,10 +130,34 @@ final class SDApplicationStage {
         set { statusRawValue = newValue.rawValue }
     }
     
-    // Convert to your existing ApplicationStage model
-    func toApplicationStage() -> ApplicationStage {
-        ApplicationStage(
-            id: firestoreId ?? id,
+    var formattedDate: String {
+        date.formatted(date: .abbreviated, time: .omitted)
+    }
+    
+    init(
+        stageRawValue: String,
+        statusRawValue: String,
+        date: Date,
+        note: String = "",
+        sortOrder: Int,
+        needsSync: Bool = true,
+        isDeleted: Bool = false
+    ) {
+        self.id = UUID().uuidString
+        self.stageRawValue = stageRawValue
+        self.statusRawValue = statusRawValue
+        self.date = date
+        self.note = note
+        self.sortOrder = sortOrder
+        self.createdAt = Date()
+        self.updatedAt = Date()
+        self.needsSync = needsSync
+        self.isDeleted = isDeleted
+    }
+    
+    func toFSApplicationStage() -> FSApplicationStage {
+        FSApplicationStage(
+            id: firestoreId,
             stage: stage,
             status: status,
             date: Timestamp(date: date),
@@ -170,21 +168,19 @@ final class SDApplicationStage {
         )
     }
     
-    // Create from your existing ApplicationStage model
-    static func from(_ stage: ApplicationStage) -> SDApplicationStage {
-        SDApplicationStage(
-            id: UUID().uuidString,
-            stageRawValue: stage.stage.rawValue,
-            statusRawValue: stage.status.rawValue,
-            date: stage.date.dateValue(),
-            note: stage.note,
-            sortOrder: stage.sortOrder,
-            createdAt: stage.createdAt.dateValue(),
-            updatedAt: stage.updatedAt.dateValue(),
+    static func from(_ fsStage: FSApplicationStage) -> SDApplicationStage {
+        let stage = SDApplicationStage(
+            stageRawValue: fsStage.stage.rawValue,
+            statusRawValue: fsStage.status.rawValue,
+            date: fsStage.date.dateValue(),
+            note: fsStage.note,
+            sortOrder: fsStage.sortOrder,
             needsSync: false,
-            lastSyncedAt: Date(),
-            firestoreId: stage.id,
             isDeleted: false
         )
+        stage.firestoreId = fsStage.id
+        stage.createdAt = fsStage.createdAt.dateValue()
+        stage.updatedAt = fsStage.updatedAt.dateValue()
+        return stage
     }
 }

@@ -77,8 +77,8 @@
 			membershipExceptions = (
 				Enums/Statuses.swift,
 				FirebaseManager.swift,
-				Model/Application.swift,
 				Model/AppUser.swift,
+				Model/FSApplication.swift,
 				Model/Interview.swift,
 				Model/SDApplication.swift,
 				Repository/FireStoreApplicaitonRepository.swift,

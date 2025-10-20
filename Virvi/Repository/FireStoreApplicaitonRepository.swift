@@ -1,47 +1,33 @@
 //
-//  ApplicationRepository.swift
+//  FirestoreApplicationRepository.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 3/10/2025.
+//  This repository is used ONLY by SyncManager for Firebase syncing
+//  The main app uses SwiftDataApplicationRepository instead
 //
 
 import Foundation
 import FirebaseFirestore
-// Structure of firestore
-//users/{userId}/applications/{appId}/stages/{stageId}
 
-// MARK: - Firestore Implementation
-class FirestoreApplicationRepository: ApplicationRepository {
+class FirestoreApplicationRepository {
     private let db = Firestore.firestore()
     
-    // MARK: - Application CRUD
+    // MARK: - Application CRUD (Internal - for syncing only)
     
-    /// Fetch all applications with their stages for a user
-    func fetchApplications(for userId: String) async throws -> [ApplicationWithStages] {
-        // Go to the users collection
+    func fetchApplications(for userId: String) async throws -> [FSApplicationWithStages] {
         let snapshot = try await db.collection("users")
-        // Go to the users specific document
             .document(userId)
-        // Go to the applications collection
             .collection("applications")
-        // Order by descending by date
             .order(by: "date", descending: true)
-        // Execute the query
             .getDocuments()
         
-        // Create a list of application with stage
-        // This will be filled with the application with corresponding stage
-        var applicationsWithStages: [ApplicationWithStages] = []
+        var applicationsWithStages: [FSApplicationWithStages] = []
         
-        // For each job application
         for document in snapshot.documents {
-            // Deserialise back into Application with codable
-            // @DocumentID is extracted into application.id
-            let application = try document.data(as: Application.self)
-            // Get all the stages for this documentID
+            let application = try document.data(as: FSApplication.self)
             let stages = try await fetchStages(for: document.documentID, userId: userId)
-            // Sotre each application and its stages into struct
-            applicationsWithStages.append(ApplicationWithStages(
+            
+            applicationsWithStages.append(FSApplicationWithStages(
                 application: application,
                 stages: stages
             ))
@@ -49,26 +35,20 @@ class FirestoreApplicationRepository: ApplicationRepository {
         
         return applicationsWithStages
     }
-
     
-    /// Create a new application
-    func createApplication(_ application: Application, for userId: String) async throws -> String {
+    func createApplication(_ application: FSApplication, for userId: String) async throws -> String {
         var newApp = application
         newApp.updatedAt = Timestamp()
         
-        // Reference to the applications directory
         let ref = try db.collection("users")
             .document(userId)
             .collection("applications")
-        // Add new applicatoin
             .addDocument(from: newApp)
-        // Return the ID
+        
         return ref.documentID
     }
     
-    /// Update an existing application
-    func updateApplication(_ application: Application, for userId: String) async throws {
-        // Ensure ID exists in application, this shouldn't be possible
+    func updateApplication(_ application: FSApplication, for userId: String) async throws {
         guard let id = application.id else {
             throw RepositoryError.missingId
         }
@@ -76,7 +56,6 @@ class FirestoreApplicationRepository: ApplicationRepository {
         var updatedApp = application
         updatedApp.updatedAt = Timestamp()
         
-        // Navigate to the document and merge data
         try db.collection("users")
             .document(userId)
             .collection("applications")
@@ -84,12 +63,9 @@ class FirestoreApplicationRepository: ApplicationRepository {
             .setData(from: updatedApp, merge: true)
     }
     
-    /// Delete an application and all its stages
     func deleteApplication(id: String, for userId: String) async throws {
-        // Delete all stages
         try await deleteAllStages(for: id, userId: userId)
         
-        // Delete the application
         try await db.collection("users")
             .document(userId)
             .collection("applications")
@@ -97,53 +73,26 @@ class FirestoreApplicationRepository: ApplicationRepository {
             .delete()
     }
     
-    /// Toggle starred status
-    func toggleStar(applicationId: String, for userId: String) async throws {
-        // Reference to the specific application in firestore
-        let applicationRef = db.collection("users")
-            .document(userId)
-            .collection("applications")
-            .document(applicationId)
-        
-        // get the application
-        let document = try await applicationRef.getDocument()
-        
-        // Deserialise into Application
-        guard let application = try? document.data(as: Application.self) else {
-            throw RepositoryError.notFound
-        }
-        
-        // Update the starred and updated at fields
-        try await applicationRef.updateData([
-            "starred": !application.starred,
-            "updatedAt": Timestamp()
-        ])
-    }
+    // MARK: - Stage CRUD (Internal - for syncing only)
     
-    // MARK: - Stage CRUD
-    
-    /// Fetch all stages for an application
-    func fetchStages(for applicationId: String, userId: String) async throws -> [ApplicationStage] {
-        // Get all stages by an application and user
+    func fetchStages(for applicationId: String, userId: String) async throws -> [FSApplicationStage] {
         let stages = try await db.collection("users")
             .document(userId)
             .collection("applications")
             .document(applicationId)
-        // Get the stages
             .collection("stages")
             .order(by: "sortOrder")
             .getDocuments()
-        // Deserialise the stages and put return the array
+        
         return try stages.documents.map { document in
-            try document.data(as: ApplicationStage.self)
+            try document.data(as: FSApplicationStage.self)
         }
     }
     
-    /// Create a new stage
-    func createStage(_ stage: ApplicationStage, for applicationId: String, userId: String) async throws -> String {
+    func createStage(_ stage: FSApplicationStage, for applicationId: String, userId: String) async throws -> String {
         var newStage = stage
         newStage.updatedAt = Timestamp()
-        // Add document
+        
         let ref = try db.collection("users")
             .document(userId)
             .collection("applications")
@@ -154,8 +103,7 @@ class FirestoreApplicationRepository: ApplicationRepository {
         return ref.documentID
     }
     
-    /// Update an existing stage
-    func updateStage(_ stage: ApplicationStage, for applicationId: String, userId: String) async throws {
+    func updateStage(_ stage: FSApplicationStage, for applicationId: String, userId: String) async throws {
         guard let id = stage.id else {
             throw RepositoryError.missingId
         }
@@ -163,18 +111,15 @@ class FirestoreApplicationRepository: ApplicationRepository {
         var updatedStage = stage
         updatedStage.updatedAt = Timestamp()
         
-        // Go to the stage
         try db.collection("users")
             .document(userId)
             .collection("applications")
             .document(applicationId)
             .collection("stages")
             .document(id)
-        // Update the details of the stage
             .setData(from: updatedStage, merge: true)
     }
     
-    /// Delete a single stage
     func deleteStage(id: String, for applicationId: String, userId: String) async throws {
         try await db.collection("users")
             .document(userId)
@@ -185,7 +130,6 @@ class FirestoreApplicationRepository: ApplicationRepository {
             .delete()
     }
     
-    /// Delete all stages for an application (used when deleting application)
     func deleteAllStages(for applicationId: String, userId: String) async throws {
         let stages = try await db.collection("users")
             .document(userId)
@@ -194,20 +138,16 @@ class FirestoreApplicationRepository: ApplicationRepository {
             .collection("stages")
             .getDocuments()
         
-        // Do batch deletion
-        // This is more efficient
         let batch = db.batch()
         for document in stages.documents {
             batch.deleteDocument(document.reference)
         }
         try await batch.commit()
     }
-    /// Find an existing application in Firestore matching company + role + date
-    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> Application? {
-        // Convert Swift Date to Firestore Timestamp
+    
+    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> FSApplication? {
         let timestamp = Timestamp(date: date)
         
-        // Query Firestore for a matching application
         let querySnapshot = try await db.collection("users")
             .document(userId)
             .collection("applications")
@@ -217,33 +157,7 @@ class FirestoreApplicationRepository: ApplicationRepository {
             .limit(to: 1)
             .getDocuments()
         
-        // If we found a matching document, deserialize it
         guard let doc = querySnapshot.documents.first else { return nil }
-        return try doc.data(as: Application.self)
-    }
-
-
-}
-
-// MARK: - Repository Errors
-
-enum RepositoryError: LocalizedError {
-    case notFound
-    case missingId
-    case invalidData
-    case unauthorized
-    
-    var errorDescription: String? {
-        switch self {
-        case .notFound:
-            return "The requested item was not found."
-        case .missingId:
-            return "Item is missing an ID."
-        case .invalidData:
-            return "The data is invalid or corrupted."
-        case .unauthorized:
-            return "You don't have permission to perform this action."
-        }
+        return try doc.data(as: FSApplication.self)
     }
 }
-

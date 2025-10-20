@@ -2,35 +2,23 @@
 //  ApplicationsListView.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 3/10/2025.
-//
 
 import SwiftUI
-import FirebaseFirestore
 
-/// The main application view which displays a page with a list of ``ApplicationRowView``
-/// Also has a scrollable filter bar which allows the user to filter based off ``StageType`` of each application
-/// Includes functionality for edit a application and add a new application by displaying ``EditApplicationView``
 struct ApplicationsListView: View {
-    /// Environment Object for tracking userID to save changes to
     @EnvironmentObject var auth: AuthViewModel
     @StateObject private var viewModel: ApplicationsListViewModel
     @State private var showingAddSheet = false
     
-    // MARK: - Constructor
-    /// Contructor that dependency injects the firestore ``ApplicationRepository`` into the ``ApplicationsListViewModel``
-    /// - Parameter repository: Repository to use for database operations, defaults to Firestore
-    init(repository: ApplicationRepository = FirestoreApplicationRepository()) {
+    init(repository: ApplicationRepository) {
         _viewModel = StateObject(wrappedValue: ApplicationsListViewModel(repository: repository))
     }
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Filter buttons
                 filterButtonsSection
                 
-                // Show loading screen if applications are being loaded
                 if viewModel.isLoading && viewModel.applications.isEmpty {
                     VStack(spacing: 20) {
                         ProgressView()
@@ -39,47 +27,17 @@ struct ApplicationsListView: View {
                             .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    // Show help message if no applications
                 } else if viewModel.filteredApplications.isEmpty {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            Spacer()
-                                .frame(height: 100)
-                            
-                            Image(systemName: getEmptyStateIcon())
-                                .font(.system(size: 60))
-                                .foregroundStyle(viewModel.showStarredOnly ? .yellow.opacity(0.5) : .secondary)
-                            
-                            Text(getEmptyStateTitle())
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                            
-                            Text(getEmptyStateMessage())
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 40)
-                            
-                            Spacer()
-                                .frame(height: 200)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemBackground))
+                    emptyStateView
                 } else {
-                    // Show application list
                     applicationsList
                 }
             }
             .navigationTitle("Job Applications")
-            // Search Bar
             .searchable(text: $viewModel.searchText, prompt: "Search applications")
-            // Apply filters on change of search bar text
             .onChange(of: viewModel.searchText) { _, _ in
                 viewModel.applyFilters()
             }
-            // Tool bar for adding a new application
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -95,51 +53,46 @@ struct ApplicationsListView: View {
                     }
                 }
             }
-            // Sheet for new application
             .sheet(isPresented: $showingAddSheet) {
-                EditApplicationView(userId: auth.user?.id ?? "", repository: viewModel.repository)
-                // Update applications when sheet closed
-                    .onDisappear {
-                        Task {
-                            await viewModel.refreshApplications(userId: auth.user?.id ?? "")
-                        }
-                    }
-            }
-            // Sheet for editing application
-            .sheet(item: $viewModel.selectedApplicationToEdit) { app in
                 EditApplicationView(
-                    applicationWithStages: app,
-                    userId: auth.user?.id ?? "",
+                    applicationWithStages: nil,
                     repository: viewModel.repository
                 )
-                // Update applications when sheet closed
                 .onDisappear {
-                    viewModel.selectedApplicationToEdit = nil
                     Task {
-                        await viewModel.refreshApplications(userId: auth.user?.id ?? "")
+                        await viewModel.refreshApplications()
                     }
                 }
             }
-            // Initially, load applications
+            .sheet(item: $viewModel.selectedApplicationToEdit) { app in
+                EditApplicationView(
+                    applicationWithStages: app,
+                    repository: viewModel.repository
+                )
+                .onDisappear {
+                    viewModel.selectedApplicationToEdit = nil
+                    Task {
+                        await viewModel.refreshApplications()
+                    }
+                }
+            }
             .task {
                 if viewModel.applications.isEmpty {
-                    await viewModel.loadApplications(userId: auth.user?.id ?? "")
+                    await viewModel.loadApplications()
                 }
             }
         }
         .scrollDismissesKeyboard(.interactively)
-
     }
     
     // MARK: - Applications List
+    
     private var applicationsList: some View {
-        // Use list for simple UI, no arrow on right
         List {
-            // Display each application with the applicationrowview
             ForEach(viewModel.filteredApplications) { appWithStages in
                 ApplicationRowView(
                     viewModel: viewModel,
-                    applicationWithStages: appWithStages,
+                    applicationWithStages: appWithStages
                 )
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -149,17 +102,16 @@ struct ApplicationsListView: View {
         .listStyle(PlainListStyle())
         .scrollContentBackground(.hidden)
         .background(Color(.systemBackground))
-        // Allow refreshing
         .refreshable {
-            await viewModel.refreshApplications(userId: auth.user?.id ?? "")
+            await viewModel.refreshApplications()
         }
     }
     
     // MARK: - Filter Buttons Section
+    
     private var filterButtonsSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                // Starred filter
                 Button {
                     viewModel.toggleStarredFilter()
                 } label: {
@@ -185,7 +137,6 @@ struct ApplicationsListView: View {
                 Divider()
                     .frame(height: 24)
                 
-                // Status filters
                 ForEach(viewModel.statuses, id: \.self) { status in
                     Button {
                         viewModel.toggleStatusFilter(status)
@@ -196,10 +147,9 @@ struct ApplicationsListView: View {
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
                             .background(status.backgroundColor)
-                             .foregroundStyle(status.color)
+                            .foregroundStyle(status.color)
                             .cornerRadius(14)
                             .overlay(
-                                // Border if selected
                                 RoundedRectangle(cornerRadius: 14)
                                     .stroke(viewModel.selectedStatusFilter == status ? status.color : Color.clear, lineWidth: 2)
                             )
@@ -212,9 +162,37 @@ struct ApplicationsListView: View {
         }
         .background(Color(.systemBackground))
     }
-
-
-
+    
+    // MARK: - Empty State
+    
+    private var emptyStateView: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                Spacer()
+                    .frame(height: 100)
+                
+                Image(systemName: getEmptyStateIcon())
+                    .font(.system(size: 60))
+                    .foregroundStyle(viewModel.showStarredOnly ? .yellow.opacity(0.5) : .secondary)
+                
+                Text(getEmptyStateTitle())
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                Text(getEmptyStateMessage())
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                
+                Spacer()
+                    .frame(height: 200)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemBackground))
+    }
     
     // MARK: - Helper Functions
     
@@ -255,7 +233,6 @@ struct ApplicationsListView: View {
     }
 }
 
-
 // MARK: - Status Badge
 
 struct StatusBadge: View {
@@ -271,10 +248,4 @@ struct StatusBadge: View {
             .foregroundStyle(status.color)
             .cornerRadius(12)
     }
-}
-
-
-#Preview {
-    ApplicationsListView(repository: MockApplicationRepository())
-        .environmentObject(AuthViewModel())
 }

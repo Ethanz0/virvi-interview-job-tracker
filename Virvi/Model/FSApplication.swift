@@ -11,7 +11,7 @@ import FirebaseFirestore
 // MARK: - Application Model
 
 /// Job application model
-struct Application: Codable, Identifiable {
+struct FSApplication: Codable, Identifiable {
     @DocumentID var id: String?
     var role: String
     var company: String
@@ -60,7 +60,7 @@ struct Application: Codable, Identifiable {
 // MARK: - Application Stage Model
 
 /// Job application stage model
-struct ApplicationStage: Codable, Identifiable {
+struct FSApplicationStage: Codable, Identifiable {
     @DocumentID var id: String?
     var stage: StageType
     var status: StageStatus
@@ -105,9 +105,9 @@ struct ApplicationStage: Codable, Identifiable {
 // MARK: - Application with Stages
 
 /// Stores an ``Application`` with its array of ``ApplicationStage``
-struct ApplicationWithStages: Identifiable {
-    var application: Application
-    var stages: [ApplicationStage]
+struct FSApplicationWithStages: Identifiable {
+    var application: FSApplication
+    var stages: [FSApplicationStage]
     
     var id: String? {
         application.id
@@ -130,12 +130,12 @@ struct ApplicationWithStages: Identifiable {
 //        return formatter.date(from: self)
 //    }
 //}
-extension Application {
+extension FSApplication {
     var formattedDate: String {
         date.dateValue().formatted(date: .abbreviated, time: .omitted)
     }
 }
-extension ApplicationStage {
+extension FSApplicationStage {
     var formattedDate: String {
         date.dateValue().formatted(date: .abbreviated, time: .omitted)
     }

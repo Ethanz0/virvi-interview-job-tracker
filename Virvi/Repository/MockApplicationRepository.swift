@@ -2,96 +2,108 @@
 //  MockApplicationRepository.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 5/10/2025.
-//
+
 import Foundation
-import FirebaseFirestore
 
-// MARK: - Mock Repository
-
-/// This is a mock repository used for previews and testing viewmodels
+/// Mock repository for previews and testing
+@MainActor
 class MockApplicationRepository: ApplicationRepository {
-    /// Handle applications with a array
-    var applications: [ApplicationWithStages] = []
+    private var applications: [SDApplication] = []
     
-    func fetchApplications(for userId: String) async throws -> [ApplicationWithStages] {
-        return applications
-    }
-    
-    
-    func createApplication(_ application: Application, for userId: String) async throws -> String {
-        let id = UUID().uuidString
-        var newApp = application
-        newApp.id = id
-        applications.append(ApplicationWithStages(application: newApp, stages: []))
-        return id
-    }
-    
-    func updateApplication(_ application: Application, for userId: String) async throws {
-        guard let index = applications.firstIndex(where: { $0.id == application.id }) else {
-            throw RepositoryError.notFound
+    func fetchApplications() async throws -> [ApplicationWithStages] {
+        return applications.map { app in
+            let stages = (app.stages ?? [])
+                .filter { !$0.isDeleted }
+                .sorted(by: { $0.sortOrder < $1.sortOrder })
+            
+            return ApplicationWithStages(
+                application: app,
+                stages: stages
+            )
         }
-        applications[index].application = application
     }
     
-    func deleteApplication(id: String, for userId: String) async throws {
-        applications.removeAll { $0.id == id }
+    func createApplication(
+        role: String,
+        company: String,
+        date: Date,
+        status: ApplicationStatus,
+        starred: Bool,
+        note: String
+    ) async throws -> SDApplication {
+        let app = SDApplication(
+            role: role,
+            company: company,
+            date: date,
+            statusRawValue: status.rawValue,
+            starred: starred,
+            note: note,
+            needsSync: false,
+            isDeleted: false
+        )
+        applications.append(app)
+        return app
     }
     
-    func toggleStar(applicationId: String, for userId: String) async throws {
-        guard let index = applications.firstIndex(where: { $0.id == applicationId }) else {
-            throw RepositoryError.notFound
-        }
-        applications[index].application.starred.toggle()
+    func updateApplication(_ application: SDApplication) async throws {
+        // In-memory update - nothing to do as we're working with reference types
+        application.updatedAt = Date()
     }
     
-    func fetchStages(for applicationId: String, userId: String) async throws -> [ApplicationStage] {
-        guard let app = applications.first(where: { $0.id == applicationId }) else {
-            throw RepositoryError.notFound
-        }
-        return app.stages
+    func deleteApplication(_ application: SDApplication) async throws {
+        applications.removeAll { $0.id == application.id }
     }
     
-    func createStage(_ stage: ApplicationStage, for applicationId: String, userId: String) async throws -> String {
-        guard let index = applications.firstIndex(where: { $0.id == applicationId }) else {
-            throw RepositoryError.notFound
-        }
-        var newStage = stage
-        newStage.id = UUID().uuidString
-        applications[index].stages.append(newStage)
-        return newStage.id!
+    func toggleStar(_ application: SDApplication) async throws {
+        application.starred.toggle()
+        application.updatedAt = Date()
     }
     
-    func updateStage(_ stage: ApplicationStage, for applicationId: String, userId: String) async throws {
-        guard let appIndex = applications.firstIndex(where: { $0.id == applicationId }),
-              let stageIndex = applications[appIndex].stages.firstIndex(where: { $0.id == stage.id }) else {
-            throw RepositoryError.notFound
-        }
-        applications[appIndex].stages[stageIndex] = stage
+    func fetchStages(for application: SDApplication) async throws -> [SDApplicationStage] {
+        return (application.stages ?? [])
+            .filter { !$0.isDeleted }
+            .sorted(by: { $0.sortOrder < $1.sortOrder })
     }
     
-    func deleteStage(id: String, for applicationId: String, userId: String) async throws {
-        guard let appIndex = applications.firstIndex(where: { $0.id == applicationId }) else {
-            throw RepositoryError.notFound
+    func createStage(
+        for application: SDApplication,
+        stage: StageType,
+        status: StageStatus,
+        date: Date,
+        note: String,
+        sortOrder: Int
+    ) async throws -> SDApplicationStage {
+        let newStage = SDApplicationStage(
+            stageRawValue: stage.rawValue,
+            statusRawValue: status.rawValue,
+            date: date,
+            note: note,
+            sortOrder: sortOrder,
+            needsSync: false,
+            isDeleted: false
+        )
+        
+        newStage.application = application
+        
+        if application.stages == nil {
+            application.stages = []
         }
-        applications[appIndex].stages.removeAll { $0.id == id }
+        application.stages?.append(newStage)
+        
+        return newStage
     }
     
-    func deleteAllStages(for applicationId: String, userId: String) async throws {
-        guard let index = applications.firstIndex(where: { $0.id == applicationId }) else {
-            throw RepositoryError.notFound
-        }
-        applications[index].stages.removeAll()
+    func updateStage(_ stage: SDApplicationStage) async throws {
+        stage.updatedAt = Date()
     }
-    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> Application? {
-        // Look for an application in the array that matches the unique fields
-        if let appWithStages = applications.first(where: {
-            $0.application.company == company &&
-            $0.application.role == role &&
-            $0.application.date.dateValue() == date
-        }) {
-            return appWithStages.application
+    
+    func deleteStage(_ stage: SDApplicationStage) async throws {
+        if let app = stage.application {
+            app.stages?.removeAll { $0.id == stage.id }
         }
-        return nil
+    }
+    
+    func deleteAllStages(for application: SDApplication) async throws {
+        application.stages?.removeAll()
     }
 }
