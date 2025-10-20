@@ -492,7 +492,7 @@ struct AccountSettingsView: View {
     private func gradientColors(for user: AppUser) -> [Color] {
         let input = user.email + user.firstName
         let digest = SHA256.hash(data: Data(input.utf8))
-        let bytes = Array(digest) // convert digest -> [UInt8]
+        let bytes = Array(digest)
         
         // digest is 32 bytes, so indexing 0 and 1 is safe
         let hue1 = Double(bytes[0]) / 255.0

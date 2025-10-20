@@ -23,13 +23,13 @@ struct Virvi: App {
     
     @StateObject private var auth = AuthViewModel()
     
-    // SwiftData container with ALL models including existing Interview models
+    // SwiftData container with models including existing Interview models
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             // New application tracking models
             SDApplication.self,
             SDApplicationStage.self,
-            // Existing interview models - IMPORTANT: Keep these!
+            // Existing interview models
             Interview.self,
             Question.self
         ])
@@ -56,11 +56,10 @@ struct Virvi: App {
                 .environmentObject(auth)
                 .onChange(of: auth.user) { oldValue, newValue in
                     // Setup sync when user authenticates
-                    if let user = newValue, oldValue == nil {
+                    if newValue != nil, oldValue == nil {
                         Task {
                             let context = sharedModelContainer.mainContext
-                            let syncManager = SyncManager(modelContext: context)
-//                            await syncManager.performInitialSync(userId: user.id)
+                            _ = SyncManager(modelContext: context)
                         }
                     }
                 }

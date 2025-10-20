@@ -168,7 +168,7 @@ class SyncManager: ObservableObject {
         isSyncing = true
         syncError = nil
         
-        do {
+//        do {
             print("🔄 Starting full sync (including pull from cloud)")
             
             // Push FIRST to sync any local changes created while offline
@@ -181,10 +181,10 @@ class SyncManager: ObservableObject {
             
             lastSyncDate = Date()
             print("Full sync completed successfully")
-        } catch {
-            syncError = error.localizedDescription
-            print("Full sync error: \(error)")
-        }
+//        } catch {
+//            syncError = error.localizedDescription
+//            print("Full sync error: \(error)")
+//        }
         
         isSyncing = false
     }
