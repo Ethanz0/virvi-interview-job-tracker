@@ -1,8 +1,3 @@
-//
-//  ApplicationsListView.swift
-//  Virvi
-//
-
 import SwiftUI
 
 struct ApplicationsListView: View {

@@ -96,6 +96,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         application.needsSync = true
         
         try modelContext.save()
+        print("1 toggling")
         syncManager?.scheduleSync()
     }
     

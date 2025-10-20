@@ -17,81 +17,85 @@ struct ContentView: View {
     @State private var syncManager: SyncManager?
     @State private var formResetTrigger = UUID()
     @State private var questionService = QuestionUpdateService()
+    @State private var applicationRepository: SwiftDataApplicationRepository?
 
-    private var applicationRepository: ApplicationRepository {
-        SwiftDataApplicationRepository(
-            modelContext: modelContext,
-            syncManager: syncManager
-        )
-    }
-    
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ApplicationsListView(repository: applicationRepository)
-                .tabItem {
-                    Label("Applications", systemImage: "list.bullet")
-                }
-                .tag(0)
-            
-            NavigationStack(path: $interviewPath) {
-                InterviewForm(
-                    path: $interviewPath,
-                    resetTrigger: formResetTrigger
-                )
-                .navigationDestination(for: InterviewDestination.self) { destination in
-                    switch destination {
-                    case .questionList(let interview):
-                        QuestionListView(
-                            interview: interview,
-                            path: $interviewPath
-                        )
-                    case .dynamicInterview(let interview):
-                        InterviewChatView(
-                            interview: interview,
-                            isDynamicMode: true,
+        Group {
+            if let repository = applicationRepository {
+                TabView(selection: $selectedTab) {
+                    ApplicationsListView(repository: repository)
+                        .tabItem {
+                            Label("Applications", systemImage: "list.bullet")
+                        }
+                        .tag(0)
+                    
+                    NavigationStack(path: $interviewPath) {
+                        InterviewForm(
                             path: $interviewPath,
-                            onComplete: resetInterviewForm
+                            resetTrigger: formResetTrigger
                         )
-                    case .interview(let interview):
-                        InterviewChatView(
-                            interview: interview,
-                            isDynamicMode: false,
-                            path: $interviewPath,
-                            onComplete: resetInterviewForm
-                        )
+                        .navigationDestination(for: InterviewDestination.self) { destination in
+                            switch destination {
+                            case .questionList(let interview):
+                                QuestionListView(
+                                    interview: interview,
+                                    path: $interviewPath
+                                )
+                            case .dynamicInterview(let interview):
+                                InterviewChatView(
+                                    interview: interview,
+                                    isDynamicMode: true,
+                                    path: $interviewPath,
+                                    onComplete: resetInterviewForm
+                                )
+                            case .interview(let interview):
+                                InterviewChatView(
+                                    interview: interview,
+                                    isDynamicMode: false,
+                                    path: $interviewPath,
+                                    onComplete: resetInterviewForm
+                                )
+                            }
+                        }
                     }
-                }
-            }
-            .tabItem {
-                Label("New Interview", systemImage: "plus.circle.fill")
-            }
-            .tag(1)
-            
-            CompletedInterviewsView()
-                .tabItem {
-                    Label("Completed", systemImage: "checkmark.circle.fill")
-                }
-                .tag(2)
-            
-            if let syncManager = syncManager {
-                ProfileView(syncManager: syncManager)
                     .tabItem {
-                        Label("Profile", systemImage: "person.fill")
+                        Label("New Interview", systemImage: "plus.circle.fill")
                     }
-                    .tag(3)
+                    .tag(1)
+                    
+                    CompletedInterviewsView()
+                        .tabItem {
+                            Label("Completed", systemImage: "checkmark.circle.fill")
+                        }
+                        .tag(2)
+                    
+                    if let syncManager = syncManager {
+                        ProfileView(syncManager: syncManager)
+                            .tabItem {
+                                Label("Profile", systemImage: "person.fill")
+                            }
+                            .tag(3)
+                    } else {
+                        ProfileView(syncManager: SyncManager(modelContext: modelContext))
+                            .tabItem {
+                                Label("Profile", systemImage: "person.fill")
+                            }
+                            .tag(3)
+                    }
+                }
             } else {
-                ProfileView(syncManager: SyncManager(modelContext: modelContext))
+                Color.black
+                    .ignoresSafeArea()
                     .tabItem {
-                        Label("Profile", systemImage: "person.fill")
+                        Label("Applications", systemImage: "list.bullet")
                     }
-                    .tag(3)
+                    .tag(0)
             }
         }
         .onAppear {
-            if syncManager == nil {
-                Task{
+            if syncManager == nil || applicationRepository == nil {
+                Task {
                     await setupSyncManager()
-
                 }
             }
             scheduleBackgroundTask()
@@ -100,47 +104,60 @@ struct ContentView: View {
             await questionService.updateQuestionIfNeeded()
         }
         .onChange(of: auth.user) { oldUser, newUser in
-            Task{
+            Task {
                 await handleAuthChange(oldUser: oldUser, newUser: newUser)
             }
         }
     }
+    
     private func scheduleBackgroundTask() {
         let request = BGAppRefreshTaskRequest(identifier: "com.virvi.app.refresh-question")
         request.earliestBeginDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())
         
         do {
             try BGTaskScheduler.shared.submit(request)
-            print("✅ Background task scheduled successfully")
+            print("Background task scheduled successfully")
         } catch {
-            print("❌ Failed to schedule: \(error)")
+            print("Failed to schedule: \(error)")
         }
     }
+    
     private func resetInterviewForm() {
         formResetTrigger = UUID()
     }
     
     private func setupSyncManager() async {
+        print("Setting up SyncManager...")
+        
         let manager = SyncManager(modelContext: modelContext)
         syncManager = manager
         
+        // Create repository with sync manager
+        let repo = SwiftDataApplicationRepository(
+            modelContext: modelContext,
+            syncManager: manager
+        )
+        applicationRepository = repo
+        
+        print("SyncManager and Repository initialized")
+        
         if let user = auth.user {
+            print("👤 Enabling sync for user: \(user.id)")
             await manager.enableSync(for: user.id)
-            Task {
-                await manager.performInitialSync(userId: user.id)
-            }
         }
     }
     
     private func handleAuthChange(oldUser: AppUser?, newUser: AppUser?) async {
-        guard let manager = syncManager else { return }
+        guard let manager = syncManager else {
+            print("handleAuthChange: syncManager is nil")
+            return
+        }
         
         if let user = newUser {
+            print("Auth change: Enabling sync for user: \(user.id)")
             await manager.enableSync(for: user.id)
-            Task {
-                await manager.performInitialSync(userId: user.id)
-            }
         } else if oldUser != nil {
+            print("Auth change: Disabling sync (user signed out)")
             await manager.disableSync()
         }
     }

@@ -60,7 +60,7 @@ struct Virvi: App {
                         Task {
                             let context = sharedModelContainer.mainContext
                             let syncManager = SyncManager(modelContext: context)
-                            await syncManager.performInitialSync(userId: user.id)
+//                            await syncManager.performInitialSync(userId: user.id)
                         }
                     }
                 }

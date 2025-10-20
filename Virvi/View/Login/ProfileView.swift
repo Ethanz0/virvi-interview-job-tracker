@@ -186,31 +186,9 @@ struct ProfileView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                             }
+                            .buttonStyle(.plain) // Add this to prevent Section's default button styling
                         }
                         .padding(.vertical)
-                    }
-                    
-                    Section {
-                        HStack {
-                            Image(systemName: "checkmark.circle")
-                                .foregroundColor(.green)
-                            Text("Your data is stored locally")
-                                .font(.subheadline)
-                        }
-                        
-                        HStack {
-                            Image(systemName: "lock.fill")
-                                .foregroundColor(.green)
-                            Text("Complete privacy - no account required")
-                                .font(.subheadline)
-                        }
-                        
-                        HStack {
-                            Image(systemName: "bolt.fill")
-                                .foregroundColor(.green)
-                            Text("Works offline")
-                                .font(.subheadline)
-                        }
                     }
                     
                     // MARK: - Data Management Section

@@ -56,7 +56,7 @@ class SyncManager: ObservableObject {
     
     private func clearAllLocalData() async {
         do {
-            print("🗑️ Clearing all local data on sign out")
+            print("Clearing all local data on sign out")
             
             // Delete all applications (cascade will delete stages)
             let descriptor = FetchDescriptor<SDApplication>()
@@ -74,7 +74,7 @@ class SyncManager: ObservableObject {
             syncError = nil
             
         } catch {
-            print("❌ Error clearing data: \(error)")
+            print("Error clearing data: \(error)")
             syncError = "Failed to clear data: \(error.localizedDescription)"
         }
     }
@@ -82,6 +82,7 @@ class SyncManager: ObservableObject {
     // MARK: - Sync Methods
     
     func scheduleSync() {
+        print("2 schedule begining")
         guard let userId = userId else { return }
         
         syncTask?.cancel()
@@ -93,7 +94,7 @@ class SyncManager: ObservableObject {
             scheduleDeferredSync(userId: userId)
             return
         }
-        
+        print("Sync detected, doing the sync")
         syncTask = Task {
             do {
                 try await Task.sleep(nanoseconds: UInt64(debounceInterval * 1_000_000_000))
@@ -391,7 +392,7 @@ class SyncManager: ObservableObject {
         
         // CRITICAL: Always check for existing cloud app before creating
         if sdApp.firestoreId == nil {
-            print("🔍 Looking for existing cloud app: \(sdApp.company) - \(sdApp.role)")
+            print("Looking for existing cloud app: \(sdApp.company) - \(sdApp.role)")
             
             if let existingCloudApp = try await firestoreRepo.findApplication(
                 company: sdApp.company,
@@ -399,12 +400,12 @@ class SyncManager: ObservableObject {
                 date: sdApp.date,
                 for: userId
             ) {
-                print("✓ Found existing cloud app, linking instead of creating: \(sdApp.company)")
+                print("Found existing cloud app, linking instead of creating: \(sdApp.company)")
                 sdApp.firestoreId = existingCloudApp.id
                 
                 // Merge: use newer version
                 if existingCloudApp.updatedAt.dateValue() > sdApp.updatedAt {
-                    print("  → Cloud version is newer, updating local")
+                    print("Cloud version is newer, updating local")
                     sdApp.role = existingCloudApp.role
                     sdApp.company = existingCloudApp.company
                     sdApp.date = existingCloudApp.date.dateValue()
@@ -413,10 +414,10 @@ class SyncManager: ObservableObject {
                     sdApp.note = existingCloudApp.note
                     sdApp.updatedAt = existingCloudApp.updatedAt.dateValue()
                 } else {
-                    print("  → Local version is newer, will update cloud")
+                    print("Local version is newer, will update cloud")
                 }
             } else {
-                print("✓ No existing cloud app found, will create new")
+                print("No existing cloud app found, will create new")
             }
         }
         
