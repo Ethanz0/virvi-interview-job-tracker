@@ -87,11 +87,16 @@ struct ContentView: View {
         }
         .onAppear {
             if syncManager == nil {
-                setupSyncManager()
+                Task{
+                    await setupSyncManager()
+
+                }
             }
         }
         .onChange(of: auth.user) { oldUser, newUser in
-            handleAuthChange(oldUser: oldUser, newUser: newUser)
+            Task{
+                await handleAuthChange(oldUser: oldUser, newUser: newUser)
+            }
         }
     }
     
@@ -99,28 +104,28 @@ struct ContentView: View {
         formResetTrigger = UUID()
     }
     
-    private func setupSyncManager() {
+    private func setupSyncManager() async {
         let manager = SyncManager(modelContext: modelContext)
         syncManager = manager
         
         if let user = auth.user {
-            manager.enableSync(for: user.id)
+            await manager.enableSync(for: user.id)
             Task {
                 await manager.performInitialSync(userId: user.id)
             }
         }
     }
     
-    private func handleAuthChange(oldUser: AppUser?, newUser: AppUser?) {
+    private func handleAuthChange(oldUser: AppUser?, newUser: AppUser?) async {
         guard let manager = syncManager else { return }
         
         if let user = newUser {
-            manager.enableSync(for: user.id)
+            await manager.enableSync(for: user.id)
             Task {
                 await manager.performInitialSync(userId: user.id)
             }
         } else if oldUser != nil {
-            manager.disableSync()
+            await manager.disableSync()
         }
     }
 }

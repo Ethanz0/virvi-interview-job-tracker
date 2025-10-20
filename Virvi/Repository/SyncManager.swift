@@ -2,8 +2,8 @@ import Foundation
 import SwiftData
 import FirebaseFirestore
 
-// MARK: - Sync Manager
-/// Handles bidirectional sync between SwiftData and Firestore
+// MARK: - Sync Manager with Sign Out Data Clear
+
 @MainActor
 class SyncManager: ObservableObject {
     @Published var isSyncing = false
@@ -16,7 +16,6 @@ class SyncManager: ObservableObject {
     private var syncTask: Task<Void, Never>?
     private var hasPendingChanges = false
     
-    // Sync configuration
     private let debounceInterval: TimeInterval = 5.0
     private let minSyncInterval: TimeInterval = 30.0
     
@@ -27,14 +26,18 @@ class SyncManager: ObservableObject {
     
     // MARK: - Public API
     
-    func enableSync(for userId: String) {
+    func enableSync(for userId: String) async {
         self.userId = userId
+        await performInitialSync(userId: userId)
     }
     
-    func disableSync() {
+    func disableSync() async {
         self.userId = nil
         syncTask?.cancel()
         syncTask = nil
+        
+        // Clear all local data on sign out
+        await clearAllLocalData()
     }
     
     func syncNow() async {
@@ -48,6 +51,35 @@ class SyncManager: ObservableObject {
         syncTask?.cancel()
         await performFullSync(userId: userId)
     }
+    
+    // MARK: - Clear Local Data
+    
+    private func clearAllLocalData() async {
+        do {
+            print("🗑️ Clearing all local data on sign out")
+            
+            // Delete all applications (cascade will delete stages)
+            let descriptor = FetchDescriptor<SDApplication>()
+            let allApps = try modelContext.fetch(descriptor)
+            
+            for app in allApps {
+                modelContext.delete(app)
+            }
+            
+            try modelContext.save()
+            print("✅ Cleared \(allApps.count) applications")
+            
+            // Reset sync state
+            lastSyncDate = nil
+            syncError = nil
+            
+        } catch {
+            print("❌ Error clearing data: \(error)")
+            syncError = "Failed to clear data: \(error.localizedDescription)"
+        }
+    }
+    
+    // MARK: - Sync Methods
     
     func scheduleSync() {
         guard let userId = userId else { return }
@@ -135,18 +167,23 @@ class SyncManager: ObservableObject {
         isSyncing = true
         syncError = nil
         
-//        do {
+        do {
             print("🔄 Starting full sync (including pull from cloud)")
+            
+            // Push FIRST to sync any local changes created while offline
             await pushToFirestore(userId: userId)
+            
+            // Then pull to get any cloud changes
             await pullFromFirestore(userId: userId)
+            
             await cleanupSyncedDeletions()
             
             lastSyncDate = Date()
             print("Full sync completed successfully")
-//        } catch {
-//            syncError = error.localizedDescription
-//            print("Full sync error: \(error)")
-//        }
+        } catch {
+            syncError = error.localizedDescription
+            print("Full sync error: \(error)")
+        }
         
         isSyncing = false
     }
@@ -167,7 +204,7 @@ class SyncManager: ObservableObject {
         )
         let stagesNeedingSync = try modelContext.fetch(stageDescriptor)
         
-        if !stagesNeedingSync.isEmpty{
+        if !stagesNeedingSync.isEmpty {
             print("Found \(stagesNeedingSync.count) stages needing sync")
             return true
         }
@@ -247,7 +284,6 @@ class SyncManager: ObservableObject {
             } else {
                 print("Local app is newer, keeping local: \(existingApp.company)")
             }
-            
             
             try await mergeStages(cloudStages: cloudApp.stages, localApp: existingApp)
             
@@ -353,17 +389,22 @@ class SyncManager: ObservableObject {
     private func pushApplication(_ sdApp: SDApplication, userId: String) async throws {
         let application = sdApp.toFSApplication()
         
-        // Check for existing cloud app
+        // CRITICAL: Always check for existing cloud app before creating
         if sdApp.firestoreId == nil {
+            print("🔍 Looking for existing cloud app: \(sdApp.company) - \(sdApp.role)")
+            
             if let existingCloudApp = try await firestoreRepo.findApplication(
                 company: sdApp.company,
                 role: sdApp.role,
                 date: sdApp.date,
                 for: userId
             ) {
+                print("✓ Found existing cloud app, linking instead of creating: \(sdApp.company)")
                 sdApp.firestoreId = existingCloudApp.id
-                print("Linked local app to existing cloud app: \(sdApp.company)")
+                
+                // Merge: use newer version
                 if existingCloudApp.updatedAt.dateValue() > sdApp.updatedAt {
+                    print("  → Cloud version is newer, updating local")
                     sdApp.role = existingCloudApp.role
                     sdApp.company = existingCloudApp.company
                     sdApp.date = existingCloudApp.date.dateValue()
@@ -371,31 +412,29 @@ class SyncManager: ObservableObject {
                     sdApp.starred = existingCloudApp.starred
                     sdApp.note = existingCloudApp.note
                     sdApp.updatedAt = existingCloudApp.updatedAt.dateValue()
+                } else {
+                    print("  → Local version is newer, will update cloud")
                 }
+            } else {
+                print("✓ No existing cloud app found, will create new")
             }
         }
         
-        // Create or update in Firestore
         if sdApp.firestoreId != nil {
             try await firestoreRepo.updateApplication(application, for: userId)
             print("Updated app in Firestore: \(sdApp.company)")
-
         } else {
             let newId = try await firestoreRepo.createApplication(application, for: userId)
             sdApp.firestoreId = newId
             print("Created new app in Firestore: \(sdApp.company) (ID: \(newId))")
-
         }
         
-        // Sync stages
         for sdStage in sdApp.stages ?? [] where !sdStage.isDeleted {
             if sdStage.needsSync {
                 try await pushStage(sdStage, applicationId: sdApp.firestoreId ?? sdApp.id, userId: userId)
-                
             }
         }
         
-        // Push deleted stages
         for sdStage in sdApp.stages ?? [] where sdStage.isDeleted {
             if sdStage.needsSync, let firestoreStageId = sdStage.firestoreId {
                 try await firestoreRepo.deleteStage(

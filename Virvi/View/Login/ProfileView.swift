@@ -179,8 +179,16 @@ struct ProfileView: View {
             .alert("Sign Out", isPresented: $showingSignOutAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Sign Out", role: .destructive) {
-                    auth.signOut()
+                    Task {
+                        // Final sync to save everything to cloud
+                        await syncManager.fullSyncNow()
+                        
+                        // Sign out (this calls disableSync which clears data)
+                        await syncManager.disableSync()
+                        auth.signOut()
+                    }
                 }
+                
             } message: {
                 Text("Your data will remain on this device. You can sign in again anytime to sync.")
             }

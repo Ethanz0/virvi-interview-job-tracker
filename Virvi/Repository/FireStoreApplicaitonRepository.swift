@@ -145,19 +145,38 @@ class FirestoreApplicationRepository {
         try await batch.commit()
     }
     
-    func findApplication(company: String, role: String, date: Date, for userId: String) async throws -> FSApplication? {
-        let timestamp = Timestamp(date: date)
         
-        let querySnapshot = try await db.collection("users")
-            .document(userId)
+    func findApplication(
+        company: String,
+        role: String,
+        date: Date,
+        for userId: String
+    ) async throws -> FSApplication? {
+        let db = Firestore.firestore()
+        
+        // Query by company and role
+        let snapshot = try await db
+            .collection("users").document(userId)
             .collection("applications")
             .whereField("company", isEqualTo: company)
             .whereField("role", isEqualTo: role)
-            .whereField("date", isEqualTo: timestamp)
-            .limit(to: 1)
             .getDocuments()
         
-        guard let doc = querySnapshot.documents.first else { return nil }
-        return try doc.data(as: FSApplication.self)
+        let applications = try snapshot.documents.compactMap { doc -> FSApplication? in
+            try doc.data(as: FSApplication.self)
+        }
+        
+        // Find best match by date (within 1 day tolerance for timezone issues)
+        let match = applications.first { app in
+            abs(app.date.dateValue().timeIntervalSince(date)) < 86400
+        }
+        
+        if let match = match {
+            print("✓ Found existing cloud app: \(company) (ID: \(match.id ?? "unknown"))")
+        } else if !applications.isEmpty {
+            print("⚠️ Found apps with same company/role but different dates")
+        }
+        
+        return match
     }
 }

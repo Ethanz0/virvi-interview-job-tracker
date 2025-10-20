@@ -81,6 +81,9 @@ struct ApplicationsListView: View {
                     await viewModel.loadApplications()
                 }
             }
+            .task(id: auth.user?.id) {
+                await viewModel.loadApplications()
+            }
         }
         .scrollDismissesKeyboard(.interactively)
     }
