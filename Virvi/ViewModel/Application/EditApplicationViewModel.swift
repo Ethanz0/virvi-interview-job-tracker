@@ -138,11 +138,12 @@ class EditApplicationViewModel: ObservableObject {
     func deleteStages(at offsets: IndexSet) {
         for offset in offsets {
             let stage = stages[offset]
-            
+            print("1 at delete stage func checking: \(stage.stageRawValue) with deleted value \(stage.isDeleted), \(stage.needsSync)")
             // Mark stage as deleted (soft delete)
             stage.isDeleted = true
             stage.updatedAt = Date()
             stage.needsSync = true
+            print("2 at delete stage func checking: \(stage.stageRawValue) with deleted value \(stage.isDeleted), \(stage.needsSync)")
         }
         
         // FIX 4: Remove from UI array only (stages remain in database as soft-deleted)
@@ -191,37 +192,53 @@ class EditApplicationViewModel: ObservableObject {
                 
                 try await repository.updateApplication(existingApp)
                 savedApp = existingApp
+
+                // Step 1: Find stages that exist in database but not in ViewModel (were deleted)
+                let allDatabaseStages = existingApp.stages ?? []
+                let viewModelStageIds = Set(stages.map { $0.id })
                 
-                // FIX 4: Process stages that were marked as deleted
-                // Get all stages from the database (including soft-deleted ones we just marked)
-                let allStages = existingApp.stages ?? []
-                
-                for stage in allStages {
-                    if stage.isDeleted && stage.needsSync {
-                        // Stage was marked for deletion - repository will handle soft delete
-                        try await repository.deleteStage(stage)
+                for dbStage in allDatabaseStages {
+                    // If database stage is not in ViewModel's stages array, it was deleted
+                    if !viewModelStageIds.contains(dbStage.id) {
+                        print("Stage deleted from working copy, marking original: \(dbStage.stage.rawValue)")
+                        // Mark the ORIGINAL database entity as deleted
+                        dbStage.isDeleted = true
+                        dbStage.updatedAt = Date()
+                        dbStage.needsSync = true
+                        
+                        // Call repository to handle cleanup
+                        try await repository.deleteStage(dbStage)
                     }
                 }
                 
-                // Update or create visible stages
-                for stage in stages where !stage.isDeleted {
-                    if stage.firestoreId != nil || stage.application != nil {
-                        // Existing stage - update
-                        try await repository.updateStage(stage)
+                // Step 2: Update or create stages from ViewModel
+                for vmStage in stages where !vmStage.isDeleted {
+                    if vmStage.firestoreId != nil || vmStage.application != nil {
+                        // Existing stage - find the original and update it
+                        if let originalStage = allDatabaseStages.first(where: { $0.id == vmStage.id }) {
+                            originalStage.stage = vmStage.stage
+                            originalStage.status = vmStage.status
+                            originalStage.date = vmStage.date
+                            originalStage.note = vmStage.note
+                            originalStage.sortOrder = vmStage.sortOrder
+                            
+                            try await repository.updateStage(originalStage)
+                        }
                     } else {
-                        // New stage - create
+                        // New stage - create it
                         let _ = try await repository.createStage(
                             for: savedApp,
-                            stage: stage.stage,
-                            status: stage.status,
-                            date: stage.date,
-                            note: stage.note,
-                            sortOrder: stage.sortOrder
+                            stage: vmStage.stage,
+                            status: vmStage.status,
+                            date: vmStage.date,
+                            note: vmStage.note,
+                            sortOrder: vmStage.sortOrder
                         )
                     }
                 }
+                
             } else {
-                // Create new application
+                // Create new application (no changes needed here)
                 savedApp = try await repository.createApplication(
                     role: role.trimmingCharacters(in: .whitespaces),
                     company: company.trimmingCharacters(in: .whitespaces),

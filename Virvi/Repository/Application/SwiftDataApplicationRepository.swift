@@ -7,10 +7,16 @@ import SwiftData
 class SwiftDataApplicationRepository: ApplicationRepository {
     private let modelContext: ModelContext
     private weak var syncManager: SyncManager?
+    private var isUserAuthenticated: Bool = false
     
     init(modelContext: ModelContext, syncManager: SyncManager? = nil) {
         self.modelContext = modelContext
         self.syncManager = syncManager
+    }
+    
+    /// Set authentication state to determine cleanup strategy
+    func setAuthenticationState(isAuthenticated: Bool) {
+        self.isUserAuthenticated = isAuthenticated
     }
     
     // MARK: - Application CRUD
@@ -81,7 +87,14 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         try await deleteAllStages(for: application)
         
         try modelContext.save()
-        syncManager?.scheduleSync()
+        
+        // If user is not authenticated, clean up immediately (no sync needed)
+        if !isUserAuthenticated {
+            print("User not authenticated - cleaning up deletion immediately")
+            try await cleanupLocalDeletions()
+        } else {
+            syncManager?.scheduleSync()
+        }
     }
     
     func toggleStar(_ application: SDApplication) async throws {
@@ -94,6 +107,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
     }
     
     // MARK: - Stage CRUD
+    
     // FIX 3: Synchronous version using SwiftData predicate
     private func fetchStagesSync(for application: SDApplication) throws -> [SDApplicationStage] {
         let appId = application.id
@@ -174,7 +188,14 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         }
         
         try modelContext.save()
-        syncManager?.scheduleSync()
+        
+        // If user is not authenticated, clean up immediately (no sync needed)
+        if !isUserAuthenticated {
+            print("User not authenticated - cleaning up stage deletion immediately")
+            try await cleanupLocalDeletions()
+        } else {
+            syncManager?.scheduleSync()
+        }
     }
     
     func deleteAllStages(for application: SDApplication) async throws {
@@ -191,7 +212,14 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         application.needsSync = true
         
         try modelContext.save()
-        syncManager?.scheduleSync()
+        
+        // If user is not authenticated, clean up immediately (no sync needed)
+        if !isUserAuthenticated {
+            print("User not authenticated - cleaning up stage deletions immediately")
+            try await cleanupLocalDeletions()
+        } else {
+            syncManager?.scheduleSync()
+        }
     }
     
     // MARK: - Cleanup (Hard Delete)
@@ -238,6 +266,52 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         if !syncedDeletedApps.isEmpty || !syncedDeletedStages.isEmpty {
             try modelContext.save()
             print("Cleaned up \(syncedDeletedApps.count) apps and \(syncedDeletedStages.count) stages")
+        }
+    }
+    
+    /// Permanently removes soft-deleted items for non-authenticated users
+    /// This should be called when user is not logged in to clean up local deletions
+    func cleanupLocalDeletions() async throws {
+        // For non-authenticated users, delete all soft-deleted items immediately
+        // since there's no cloud sync to worry about
+        
+        let appDescriptor = FetchDescriptor<SDApplication>(
+            predicate: #Predicate { app in
+                app.isDeleted == true
+            }
+        )
+        
+        let deletedApps = try modelContext.fetch(appDescriptor)
+        
+        for app in deletedApps {
+            // Cascade cleanup - delete all stages first
+            if let stages = app.stages {
+                for stage in stages {
+                    modelContext.delete(stage)
+                }
+            }
+            
+            print("Permanently removing locally deleted app: \(app.company)")
+            modelContext.delete(app)
+        }
+        
+        // Clean up orphaned stages
+        let stageDescriptor = FetchDescriptor<SDApplicationStage>(
+            predicate: #Predicate { stage in
+                stage.isDeleted == true
+            }
+        )
+        
+        let deletedStages = try modelContext.fetch(stageDescriptor)
+        
+        for stage in deletedStages {
+            print("Permanently removing locally deleted stage: \(stage.stage.rawValue)")
+            modelContext.delete(stage)
+        }
+        
+        if !deletedApps.isEmpty || !deletedStages.isEmpty {
+            try modelContext.save()
+            print("Cleaned up \(deletedApps.count) apps and \(deletedStages.count) stages (local only)")
         }
     }
 }

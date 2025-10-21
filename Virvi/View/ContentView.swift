@@ -72,6 +72,14 @@ struct ContentView: View {
         }
         .onAppear {
             scheduleBackgroundTask()
+//            print("SwiftData DB Location: \(URL.applicationSupportDirectory.path())")
+//            let dirPaths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+//
+//            let docsDir = dirPaths[0]
+//
+//            print(docsDir)
+            print(dependencies.modelContext.sqliteCommand)
+
         }
         .task {
             await dependencies.questionService.updateQuestionIfNeeded()
@@ -94,7 +102,15 @@ struct ContentView: View {
         formResetTrigger = UUID()
     }
 }
-
+extension ModelContext {
+    var sqliteCommand: String {
+        if let url = container.configurations.first?.url.path(percentEncoded: false) {
+            "sqlite3 \"\(url)\""
+        } else {
+            "No SQLite database found."
+        }
+    }
+}
 #Preview {
     let container = try! ModelContainer(
         for: SDApplication.self, Interview.self,

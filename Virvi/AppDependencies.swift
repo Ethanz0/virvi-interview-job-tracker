@@ -38,11 +38,17 @@ class AppDependencies: ObservableObject {
     
     // Helper to enable sync when user logs in
     func enableSync(for userId: String) async {
+        if let repo = applicationRepository as? SwiftDataApplicationRepository {
+            repo.setAuthenticationState(isAuthenticated: true)
+        }
         await syncManager.enableSync(for: userId)
     }
     
     // Helper to disable sync when user logs out
     func disableSync() async {
+        if let repo = applicationRepository as? SwiftDataApplicationRepository {
+            repo.setAuthenticationState(isAuthenticated: false)
+        }
         await syncManager.disableSync()
     }
 }
