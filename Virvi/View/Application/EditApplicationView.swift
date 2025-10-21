@@ -39,6 +39,7 @@ struct EditApplicationView: View {
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
+                        print("application save button pressed")
                         Task {
                             let success = await viewModel.saveApplication()
                             if success {

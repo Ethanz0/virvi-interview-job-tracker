@@ -26,9 +26,8 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         let applications = try modelContext.fetch(descriptor)
         
         return applications.map { sdApp in
-            let stages = (sdApp.stages ?? [])
-                .filter { !$0.isDeleted }
-                .sorted(by: { $0.sortOrder < $1.sortOrder })
+            // FIX 3: Use fetchStages to get filtered stages with SwiftData predicate
+            let stages = (try? fetchStagesSync(for: sdApp)) ?? []
             
             return ApplicationWithStages(
                 application: sdApp,
@@ -59,7 +58,6 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         modelContext.insert(sdApp)
         try modelContext.save()
         
-        // Trigger sync in background
         syncManager?.scheduleSync()
         
         return sdApp
@@ -74,17 +72,13 @@ class SwiftDataApplicationRepository: ApplicationRepository {
     }
     
     func deleteApplication(_ application: SDApplication) async throws {
-        // Soft delete
+        // Soft delete application
         application.isDeleted = true
         application.updatedAt = Date()
         application.needsSync = true
         
-        // Also soft delete all stages
-        for stage in application.stages ?? [] {
-            stage.isDeleted = true
-            stage.updatedAt = Date()
-            stage.needsSync = true
-        }
+        // FIX 1: Use deleteAllStages which properly soft-deletes all stages
+        try await deleteAllStages(for: application)
         
         try modelContext.save()
         syncManager?.scheduleSync()
@@ -96,16 +90,27 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         application.needsSync = true
         
         try modelContext.save()
-        print("1 toggling")
         syncManager?.scheduleSync()
     }
     
     // MARK: - Stage CRUD
+    // FIX 3: Synchronous version using SwiftData predicate
+    private func fetchStagesSync(for application: SDApplication) throws -> [SDApplicationStage] {
+        let appId = application.id
+        
+        // Use SwiftData predicate to filter at query time
+        let descriptor = FetchDescriptor<SDApplicationStage>(
+            predicate: #Predicate<SDApplicationStage> { stage in
+                stage.application?.id == appId && stage.isDeleted == false
+            },
+            sortBy: [SortDescriptor(\.sortOrder)]
+        )
+        
+        return try modelContext.fetch(descriptor)
+    }
     
     func fetchStages(for application: SDApplication) async throws -> [SDApplicationStage] {
-        return (application.stages ?? [])
-            .filter { !$0.isDeleted }
-            .sorted(by: { $0.sortOrder < $1.sortOrder })
+        return try fetchStagesSync(for: application)
     }
     
     func createStage(
@@ -139,6 +144,12 @@ class SwiftDataApplicationRepository: ApplicationRepository {
     }
     
     func updateStage(_ stage: SDApplicationStage) async throws {
+        // FIX 4: Don't update stages that are marked for deletion
+        guard !stage.isDeleted else {
+            print("Skipping update for deleted stage")
+            return
+        }
+        
         stage.updatedAt = Date()
         stage.needsSync = true
         
@@ -152,7 +163,7 @@ class SwiftDataApplicationRepository: ApplicationRepository {
     }
     
     func deleteStage(_ stage: SDApplicationStage) async throws {
-        // Soft delete
+        // FIX 1: Unified soft delete logic
         stage.isDeleted = true
         stage.updatedAt = Date()
         stage.needsSync = true
@@ -167,15 +178,67 @@ class SwiftDataApplicationRepository: ApplicationRepository {
     }
     
     func deleteAllStages(for application: SDApplication) async throws {
-        let stages = application.stages ?? []
+        // FIX 1 & 3: Fetch stages using predicate, then soft delete each
+        let stages = try await fetchStages(for: application)
+        
         for stage in stages {
             stage.isDeleted = true
             stage.updatedAt = Date()
             stage.needsSync = true
         }
         
+        application.updatedAt = Date()
+        application.needsSync = true
+        
         try modelContext.save()
         syncManager?.scheduleSync()
+    }
+    
+    // MARK: - Cleanup (Hard Delete)
+    
+    /// Permanently removes soft-deleted items that have been synced
+    func cleanupSyncedDeletions() async throws {
+        // FIX 2: Clean up both applications AND stages
+        
+        // Clean up applications
+        let appDescriptor = FetchDescriptor<SDApplication>(
+            predicate: #Predicate { app in
+                app.isDeleted == true && app.needsSync == false
+            }
+        )
+        
+        let syncedDeletedApps = try modelContext.fetch(appDescriptor)
+        
+        for app in syncedDeletedApps {
+            // FIX 5: Cascade cleanup - delete all stages first
+            if let stages = app.stages {
+                for stage in stages {
+                    modelContext.delete(stage)
+                }
+            }
+            
+            print("Permanently removing synced deleted app: \(app.company)")
+            modelContext.delete(app)
+        }
+        
+        // FIX 2: Clean up orphaned stages (stages whose parent app was deleted)
+        let stageDescriptor = FetchDescriptor<SDApplicationStage>(
+            predicate: #Predicate { stage in
+                stage.isDeleted == true && stage.needsSync == false
+            }
+        )
+        
+        let syncedDeletedStages = try modelContext.fetch(stageDescriptor)
+        
+        for stage in syncedDeletedStages {
+            print("Permanently removing synced deleted stage: \(stage.stage.rawValue)")
+            modelContext.delete(stage)
+        }
+        
+        if !syncedDeletedApps.isEmpty || !syncedDeletedStages.isEmpty {
+            try modelContext.save()
+            print("Cleaned up \(syncedDeletedApps.count) apps and \(syncedDeletedStages.count) stages")
+        }
     }
 }
 

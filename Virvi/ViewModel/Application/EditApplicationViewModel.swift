@@ -1,8 +1,3 @@
-//
-//  EditApplicationViewModel.swift
-//  Virvi
-//
-
 import SwiftUI
 
 /// ViewModel for editing and creating applications
@@ -18,7 +13,8 @@ class EditApplicationViewModel: ObservableObject {
     
     // Stage management
     @Published var stages: [SDApplicationStage] = []
-    @Published var stagesToDelete: [SDApplicationStage] = []
+    
+    // FIX 4: No longer need stagesToDelete - we mark stages as deleted in place
     
     @Published var showingStageSection = false
     @Published var isEditingExistingStage = false
@@ -37,7 +33,7 @@ class EditApplicationViewModel: ObservableObject {
     var stageTypes: [StageType] { StageType.allCases }
     var stageStatuses: [StageStatus] { StageStatus.allCases }
     
-    // Temporary struct for stage editing (since we can't modify class properties directly in form)
+    // Temporary struct for stage editing
     struct TempStageData {
         var stage: StageType = .applied
         var status: StageStatus = .inProgress
@@ -62,6 +58,7 @@ class EditApplicationViewModel: ObservableObject {
             self.status = appWithStages.application.status
             self.starred = appWithStages.application.starred
             self.note = appWithStages.application.note
+            // FIX 1: Only load non-deleted stages (they're already filtered by repository)
             self.stages = appWithStages.stages.sorted(by: { $0.sortOrder < $1.sortOrder })
         } else {
             self.role = ""
@@ -137,18 +134,21 @@ class EditApplicationViewModel: ObservableObject {
         tempStageData = TempStageData()
     }
     
+    // FIX 1 & 4: Unified soft delete logic - always mark as deleted, never remove from array
     func deleteStages(at offsets: IndexSet) {
         for offset in offsets {
             let stage = stages[offset]
-            // Only track for deletion if it has a firestoreId (exists in database)
-            if stage.firestoreId != nil {
-                stagesToDelete.append(stage)
-            }
+            
+            // Mark stage as deleted (soft delete)
+            stage.isDeleted = true
+            stage.updatedAt = Date()
+            stage.needsSync = true
         }
         
+        // FIX 4: Remove from UI array only (stages remain in database as soft-deleted)
         stages.remove(atOffsets: offsets)
         
-        // Update sort order
+        // Update sort order for remaining stages
         for (index, stage) in stages.enumerated() {
             stage.sortOrder = index
         }
@@ -192,13 +192,19 @@ class EditApplicationViewModel: ObservableObject {
                 try await repository.updateApplication(existingApp)
                 savedApp = existingApp
                 
-                // Delete removed stages
-                for stage in stagesToDelete {
-                    try await repository.deleteStage(stage)
+                // FIX 4: Process stages that were marked as deleted
+                // Get all stages from the database (including soft-deleted ones we just marked)
+                let allStages = existingApp.stages ?? []
+                
+                for stage in allStages {
+                    if stage.isDeleted && stage.needsSync {
+                        // Stage was marked for deletion - repository will handle soft delete
+                        try await repository.deleteStage(stage)
+                    }
                 }
                 
-                // Update or create stages
-                for stage in stages {
+                // Update or create visible stages
+                for stage in stages where !stage.isDeleted {
                     if stage.firestoreId != nil || stage.application != nil {
                         // Existing stage - update
                         try await repository.updateStage(stage)
@@ -225,8 +231,8 @@ class EditApplicationViewModel: ObservableObject {
                     note: note.trimmingCharacters(in: .whitespaces)
                 )
                 
-                // Create all stages
-                for stage in stages {
+                // Create all non-deleted stages
+                for stage in stages where !stage.isDeleted {
                     let _ = try await repository.createStage(
                         for: savedApp,
                         stage: stage.stage,
@@ -251,11 +257,14 @@ class EditApplicationViewModel: ObservableObject {
     // MARK: - Intelligent Stage Defaults
     
     func getDefaultStageAndStatus() -> (stage: StageType, status: StageStatus) {
-        if stages.isEmpty {
+        // FIX 1: Only consider non-deleted stages
+        let activeStages = stages.filter { !$0.isDeleted }
+        
+        if activeStages.isEmpty {
             return (.applied, .complete)
         }
         
-        guard let mostRecentStage = stages.max(by: { $0.sortOrder < $1.sortOrder }) else {
+        guard let mostRecentStage = activeStages.max(by: { $0.sortOrder < $1.sortOrder }) else {
             return (.applied, .complete)
         }
         

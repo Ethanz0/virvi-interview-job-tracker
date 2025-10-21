@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 import FirebaseFirestore
 
-// MARK: - Sync Manager with Sign Out Data Clear
+// MARK: - Sync Manager with Stage Cleanup
 
 @MainActor
 class SyncManager: ObservableObject {
@@ -37,7 +37,6 @@ class SyncManager: ObservableObject {
         syncTask?.cancel()
         syncTask = nil
         
-        // Clear all local data on sign out
         await clearAllLocalData()
     }
     
@@ -59,18 +58,25 @@ class SyncManager: ObservableObject {
         do {
             print("Clearing all local data on sign out")
             
-            // Delete all applications (cascade will delete stages)
-            let descriptor = FetchDescriptor<SDApplication>()
-            let allApps = try modelContext.fetch(descriptor)
+            // FIX 5: Explicitly delete all stages first (cascade will handle this, but being explicit)
+            let stageDescriptor = FetchDescriptor<SDApplicationStage>()
+            let allStages = try modelContext.fetch(stageDescriptor)
+            
+            for stage in allStages {
+                modelContext.delete(stage)
+            }
+            
+            // Delete all applications (cascade will delete remaining stages)
+            let appDescriptor = FetchDescriptor<SDApplication>()
+            let allApps = try modelContext.fetch(appDescriptor)
             
             for app in allApps {
                 modelContext.delete(app)
             }
             
             try modelContext.save()
-            print("Cleared \(allApps.count) applications")
+            print("Cleared \(allApps.count) applications and \(allStages.count) stages")
             
-            // Reset sync state
             lastSyncDate = nil
             syncError = nil
             
@@ -83,7 +89,7 @@ class SyncManager: ObservableObject {
     // MARK: - Sync Methods
     
     func scheduleSync() {
-        print("📱 scheduleSync called - userId: \(userId ?? "nil")")
+        print("scheduleSync called - userId: \(userId ?? "nil")")
         guard let userId = userId else {
             print("scheduleSync aborted - no userId set")
             return
@@ -153,8 +159,9 @@ class SyncManager: ObservableObject {
             }
             print("Starting sync - found pending changes")
             
+            // Push changes (including deletions) to Firestore
+            // NOTE: pushDeletions now immediately hard-deletes after Firestore deletion
             await pushToFirestore(userId: userId)
-            await cleanupSyncedDeletions()
             
             lastSyncDate = Date()
             print("Sync completed successfully")
@@ -172,25 +179,20 @@ class SyncManager: ObservableObject {
         isSyncing = true
         syncError = nil
         
-//        do {
-            print("Starting full sync (including pull from cloud)")
-            
-            // Push FIRST to sync any local changes created while offline
-            await pushToFirestore(userId: userId)
-            
-            // Then pull to get any cloud changes
-            await pullFromFirestore(userId: userId)
-            
-            await cleanupSyncedDeletions()
-            
-            lastSyncDate = Date()
-            syncCompleted.toggle()
+        print("Starting full sync (including pull from cloud)")
+        
+        // Push FIRST to sync any local changes created while offline (including deletions)
+        // NOTE: pushDeletions now immediately hard-deletes after Firestore deletion
+        await pushToFirestore(userId: userId)
+        
+        // Then pull to get any cloud changes
+        // Deleted items are already gone, so they can't be resurrected
+        await pullFromFirestore(userId: userId)
+        
+        lastSyncDate = Date()
+        syncCompleted.toggle()
 
-            print("Full sync completed successfully")
-//        } catch {
-//            syncError = error.localizedDescription
-//            print("Full sync error: \(error)")
-//        }
+        print("Full sync completed successfully")
         
         isSyncing = false
     }
@@ -220,26 +222,47 @@ class SyncManager: ObservableObject {
     
     // MARK: - Cleanup
     
-    private func cleanupSyncedDeletions() async {
-        do {
-            let descriptor = FetchDescriptor<SDApplication>(
-                predicate: #Predicate { app in
-                    app.isDeleted == true && app.needsSync == false
+    // FIX 2 & 5: Extended cleanup to include stages and cascade delete
+    private func cleanupSyncedDeletions() async throws {
+        // Clean up applications first
+        let appDescriptor = FetchDescriptor<SDApplication>(
+            predicate: #Predicate { app in
+                app.isDeleted == true && app.needsSync == false
+            }
+        )
+        
+        let syncedDeletedApps = try modelContext.fetch(appDescriptor)
+        
+        for app in syncedDeletedApps {
+            print("Permanently removing synced deleted app: \(app.company)")
+            
+            // FIX 5: Cascade delete - explicitly delete all stages first
+            if let stages = app.stages {
+                for stage in stages {
+                    modelContext.delete(stage)
                 }
-            )
-            
-            let syncedDeletedApps = try modelContext.fetch(descriptor)
-            
-            for app in syncedDeletedApps {
-                print("Permanently removing synced deleted app: \(app.company)")
-                modelContext.delete(app)
             }
             
-            if !syncedDeletedApps.isEmpty {
-                try modelContext.save()
+            modelContext.delete(app)
+        }
+        
+        // FIX 2: Clean up orphaned stages
+        let stageDescriptor = FetchDescriptor<SDApplicationStage>(
+            predicate: #Predicate { stage in
+                stage.isDeleted == true && stage.needsSync == false
             }
-        } catch {
-            print("Cleanup error: \(error)")
+        )
+        
+        let syncedDeletedStages = try modelContext.fetch(stageDescriptor)
+        
+        for stage in syncedDeletedStages {
+            print("Permanently removing synced deleted stage: \(stage.stage.rawValue)")
+            modelContext.delete(stage)
+        }
+        
+        if !syncedDeletedApps.isEmpty || !syncedDeletedStages.isEmpty {
+            try modelContext.save()
+            print("Cleaned up \(syncedDeletedApps.count) apps and \(syncedDeletedStages.count) stages")
         }
     }
     
@@ -267,14 +290,10 @@ class SyncManager: ObservableObject {
         )
         
         if let existingApp = try modelContext.fetch(descriptor).first {
-            if existingApp.isDeleted && existingApp.needsSync {
-                print("Skipping cloud app - locally deleted and pending sync: \(cloudId)")
+            // FIX: If app is marked for deletion locally, don't resurrect it from cloud
+            if existingApp.isDeleted {
+                print("Skipping cloud app - locally deleted: \(cloudId)")
                 return
-            }
-            
-            if existingApp.isDeleted && !existingApp.needsSync {
-                print("Resurrecting app from cloud (deletion was already synced): \(cloudId)")
-                existingApp.isDeleted = false
             }
             
             if cloudApp.application.updatedAt.dateValue() > existingApp.updatedAt {
@@ -320,7 +339,9 @@ class SyncManager: ObservableObject {
             }
             
             if let existingStage = existingStage {
-                if existingStage.isDeleted && existingStage.needsSync {
+                // FIX: If stage is marked for deletion locally, don't resurrect it from cloud
+                if existingStage.isDeleted {
+                    print("Skipping cloud stage - locally deleted: \(cloudStageId)")
                     continue
                 }
                 
@@ -333,7 +354,7 @@ class SyncManager: ObservableObject {
                     existingStage.updatedAt = cloudStage.updatedAt.dateValue()
                     existingStage.needsSync = false
                     existingStage.lastSyncedAt = Date()
-                    existingStage.isDeleted = false
+                    print("Updated local stage from cloud: \(cloudStage.stage.rawValue)")
                 }
             } else {
                 let newStage = SDApplicationStage.from(cloudStage)
@@ -341,6 +362,7 @@ class SyncManager: ObservableObject {
                 newStage.lastSyncedAt = Date()
                 newStage.application = localApp
                 modelContext.insert(newStage)
+                print("Created new stage from cloud: \(cloudStage.stage.rawValue)")
             }
         }
     }
@@ -372,22 +394,71 @@ class SyncManager: ObservableObject {
     
     private func pushDeletions(userId: String) async {
         do {
-            let descriptor = FetchDescriptor<SDApplication>(
+            // Push deleted applications
+            let appDescriptor = FetchDescriptor<SDApplication>(
                 predicate: #Predicate { app in
                     app.isDeleted == true && app.needsSync == true
                 }
             )
             
-            let deletedApps = try modelContext.fetch(descriptor)
+            let deletedApps = try modelContext.fetch(appDescriptor)
             
             for sdApp in deletedApps {
                 if let firestoreId = sdApp.firestoreId {
                     try await firestoreRepo.deleteApplication(id: firestoreId, for: userId)
+                    print("Deleted app from Firestore: \(sdApp.company)")
                 }
-                modelContext.delete(sdApp)
+                // Mark as synced (will be cleaned up later)
+                sdApp.needsSync = false
+                sdApp.lastSyncedAt = Date()
+            }
+            
+            // FIX 2: Push deleted stages separately
+            let stageDescriptor = FetchDescriptor<SDApplicationStage>(
+                predicate: #Predicate { stage in
+                    stage.isDeleted == true && stage.needsSync == true
+                }
+            )
+            
+            let deletedStages = try modelContext.fetch(stageDescriptor)
+            
+            for sdStage in deletedStages {
+                if let firestoreId = sdStage.firestoreId,
+                   let appFirestoreId = sdStage.application?.firestoreId ?? sdStage.application?.id {
+                    try await firestoreRepo.deleteStage(
+                        id: firestoreId,
+                        for: appFirestoreId,
+                        userId: userId
+                    )
+                    print("Deleted stage from Firestore: \(sdStage.stage.rawValue)")
+                }
+                // Mark as synced (will be cleaned up later)
+                sdStage.needsSync = false
+                sdStage.lastSyncedAt = Date()
             }
             
             try modelContext.save()
+            
+            // CRITICAL: Immediately hard-delete after successful Firestore deletion
+            // This prevents resurrection during the same sync cycle
+            for sdApp in deletedApps {
+                if let stages = sdApp.stages {
+                    for stage in stages {
+                        modelContext.delete(stage)
+                    }
+                }
+                modelContext.delete(sdApp)
+                print("Immediately hard-deleted app: \(sdApp.company)")
+            }
+            
+            for sdStage in deletedStages {
+                modelContext.delete(sdStage)
+                print("Immediately hard-deleted stage: \(sdStage.stage.rawValue)")
+            }
+            
+            if !deletedApps.isEmpty || !deletedStages.isEmpty {
+                try modelContext.save()
+            }
         } catch {
             print("Deletion push error: \(error)")
         }
@@ -396,7 +467,7 @@ class SyncManager: ObservableObject {
     private func pushApplication(_ sdApp: SDApplication, userId: String) async throws {
         let application = sdApp.toFSApplication()
         
-        // CRITICAL: Always check for existing cloud app before creating
+        // Always check for existing cloud app before creating
         if sdApp.firestoreId == nil {
             print("Looking for existing cloud app: \(sdApp.company) - \(sdApp.role)")
             
@@ -436,22 +507,10 @@ class SyncManager: ObservableObject {
             print("Created new app in Firestore: \(sdApp.company) (ID: \(newId))")
         }
         
+        // FIX 4: Only process non-deleted stages
         for sdStage in sdApp.stages ?? [] where !sdStage.isDeleted {
             if sdStage.needsSync {
                 try await pushStage(sdStage, applicationId: sdApp.firestoreId ?? sdApp.id, userId: userId)
-            }
-        }
-        
-        for sdStage in sdApp.stages ?? [] where sdStage.isDeleted {
-            if sdStage.needsSync, let firestoreStageId = sdStage.firestoreId {
-                try await firestoreRepo.deleteStage(
-                    id: firestoreStageId,
-                    for: sdApp.firestoreId ?? sdApp.id,
-                    userId: userId
-                )
-                print("Deleted stage from Firestore")
-                sdStage.needsSync = false
-                sdStage.lastSyncedAt = Date()
             }
         }
         
