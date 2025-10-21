@@ -20,7 +20,7 @@ class AppDependencies: ObservableObject {
     init(modelContext: ModelContext, authService: AuthServicing? = nil) {
         self.modelContext = modelContext
         
-        // Use injected auth service (for testing) or create real one
+        // Use injected auth service or create real one
         self.authService = authService ?? AuthService()
         
         // Create sync manager

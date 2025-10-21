@@ -195,7 +195,7 @@ struct ProfileView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                             }
-                            .buttonStyle(.plain) // Add this to prevent Section's default button styling
+                            .buttonStyle(.plain)
                         }
                         .padding(.vertical)
                     }
@@ -274,9 +274,8 @@ struct ProfileView: View {
     private func gradientColors(for user: AppUser) -> [Color] {
         let input = user.email + user.firstName
         let digest = SHA256.hash(data: Data(input.utf8))
-        let bytes = Array(digest) // convert digest -> [UInt8]
+        let bytes = Array(digest)
         
-        // digest is 32 bytes, so indexing 0 and 1 is safe
         let hue1 = Double(bytes[0]) / 255.0
         let hue2 = Double(bytes[1]) / 255.0
         
@@ -456,7 +455,7 @@ struct AccountSettingsView: View {
         isDeletingAccount = true
         
         do {
-            // 1. Delete all local data
+            // Delete all local data
             try repository.deleteAll()
             
             let appDescriptor = FetchDescriptor<SDApplication>()
@@ -466,17 +465,17 @@ struct AccountSettingsView: View {
             }
             try modelContext.save()
             
-            // 2. Delete all cloud data (mark as deleted and sync)
+            // Delete all cloud data (mark as deleted and sync)
             let cloudApps = try await applicationRepository.fetchApplications()
             for appWithStages in cloudApps {
                 try await applicationRepository.deleteApplication(appWithStages.application)
             }
             await syncManager.fullSyncNow()
             
-            // 3. Disable sync
+            // Disable sync
             await syncManager.disableSync()
             
-            // 4. Delete Firebase Auth account
+            // Delete Firebase Auth account
             try await auth.deleteAccount()
             
             isDeletingAccount = false
@@ -501,7 +500,6 @@ struct AccountSettingsView: View {
         let digest = SHA256.hash(data: Data(input.utf8))
         let bytes = Array(digest)
         
-        // digest is 32 bytes, so indexing 0 and 1 is safe
         let hue1 = Double(bytes[0]) / 255.0
         let hue2 = Double(bytes[1]) / 255.0
         

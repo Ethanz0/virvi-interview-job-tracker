@@ -86,7 +86,7 @@
 				Model/Interview.swift,
 				Model/SDApplication.swift,
 				Repository/Application/ApplicationRepository.swift,
-				Repository/Application/FireStoreApplicaitonRepository.swift,
+				Repository/Application/FireStoreApplicationRepository.swift,
 				Repository/Application/MockApplicationRepository.swift,
 				Repository/Application/SwiftDataApplicationRepository.swift,
 				Repository/Application/SyncManager.swift,

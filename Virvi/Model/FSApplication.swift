@@ -114,22 +114,6 @@ struct FSApplicationWithStages: Identifiable {
     }
 }
 
-
-//extension Date {
-//    func toDateString() -> String {
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "yyyy-MM-dd"
-//        return formatter.string(from: self)
-//    }
-//}
-//
-//extension String {
-//    func toDate() -> Date? {
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "yyyy-MM-dd"
-//        return formatter.date(from: self)
-//    }
-//}
 extension FSApplication {
     var formattedDate: String {
         date.dateValue().formatted(date: .abbreviated, time: .omitted)

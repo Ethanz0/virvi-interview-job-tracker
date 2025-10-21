@@ -65,7 +65,7 @@ class SyncManager: ObservableObject {
         do {
             print("Clearing all local data on sign out")
             
-            // FIX 5: Explicitly delete all stages first (cascade will handle this, but being explicit)
+            // Explicitly delete all stages first (cascade will handle this, but being explicit)
             let stageDescriptor = FetchDescriptor<SDApplicationStage>()
             let allStages = try modelContext.fetch(stageDescriptor)
             
@@ -167,7 +167,7 @@ class SyncManager: ObservableObject {
             print("Starting sync - found pending changes")
             
             // Push changes (including deletions) to Firestore
-            // NOTE: pushDeletions now immediately hard-deletes after Firestore deletion
+            // PushDeletions now immediately hard-deletes after Firestore deletion
             await pushToFirestore(userId: userId)
             
             lastSyncDate = Date()
@@ -189,7 +189,7 @@ class SyncManager: ObservableObject {
         print("Starting full sync (including pull from cloud)")
         
         // Push FIRST to sync any local changes created while offline (including deletions)
-        // NOTE: pushDeletions now immediately hard-deletes after Firestore deletion
+        // PushDeletions now immediately hard-deletes after Firestore deletion
         await pushToFirestore(userId: userId)
         
         // Then pull to get any cloud changes
@@ -229,7 +229,7 @@ class SyncManager: ObservableObject {
     
     // MARK: - Cleanup
     
-    // FIX 2 & 5: Extended cleanup to include stages and cascade delete
+    // Extended cleanup to include stages and cascade delete
     private func cleanupSyncedDeletions() async throws {
         // Clean up applications first
         let appDescriptor = FetchDescriptor<SDApplication>(
@@ -243,7 +243,7 @@ class SyncManager: ObservableObject {
         for app in syncedDeletedApps {
             print("Permanently removing synced deleted app: \(app.company)")
             
-            // FIX 5: Cascade delete - explicitly delete all stages first
+            // Cascade delete - explicitly delete all stages first
             if let stages = app.stages {
                 for stage in stages {
                     modelContext.delete(stage)
@@ -253,7 +253,7 @@ class SyncManager: ObservableObject {
             modelContext.delete(app)
         }
         
-        // FIX 2: Clean up orphaned stages
+        // Clean up orphaned stages
         let stageDescriptor = FetchDescriptor<SDApplicationStage>(
             predicate: #Predicate { stage in
                 stage.isDeleted == true && stage.needsSync == false
@@ -297,7 +297,7 @@ class SyncManager: ObservableObject {
         )
         
         if let existingApp = try modelContext.fetch(descriptor).first {
-            // FIX: If app is marked for deletion locally, don't resurrect it from cloud
+            // If app is marked for deletion locally, don't resurrect it from cloud
             if existingApp.isDeleted {
                 print("Skipping cloud app - locally deleted: \(cloudId)")
                 return
@@ -346,7 +346,7 @@ class SyncManager: ObservableObject {
             }
             
             if let existingStage = existingStage {
-                // FIX: If stage is marked for deletion locally, don't resurrect it from cloud
+                // If stage is marked for deletion locally, don't resurrect it from cloud
                 if existingStage.isDeleted {
                     print("Skipping cloud stage - locally deleted: \(cloudStageId)")
                     continue
@@ -420,7 +420,7 @@ class SyncManager: ObservableObject {
                 sdApp.lastSyncedAt = Date()
             }
             
-            // FIX 2: Push deleted stages separately
+            // Push deleted stages separately
             let stageDescriptor = FetchDescriptor<SDApplicationStage>(
                 predicate: #Predicate { stage in
                     stage.isDeleted == true && stage.needsSync == true
@@ -446,7 +446,7 @@ class SyncManager: ObservableObject {
             
             try modelContext.save()
             
-            // CRITICAL: Immediately hard-delete after successful Firestore deletion
+            // Immediately hard-delete after successful Firestore deletion
             // This prevents resurrection during the same sync cycle
             for sdApp in deletedApps {
                 if let stages = sdApp.stages {
@@ -514,7 +514,7 @@ class SyncManager: ObservableObject {
             print("Created new app in Firestore: \(sdApp.company) (ID: \(newId))")
         }
         
-        // FIX 4: Only process non-deleted stages
+        // Only process non-deleted stages
         for sdStage in sdApp.stages ?? [] where !sdStage.isDeleted {
             if sdStage.needsSync {
                 try await pushStage(sdStage, applicationId: sdApp.firestoreId ?? sdApp.id, userId: userId)

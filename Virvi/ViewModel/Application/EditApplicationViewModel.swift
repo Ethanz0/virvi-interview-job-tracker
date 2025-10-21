@@ -20,9 +20,7 @@ class EditApplicationViewModel: ObservableObject {
     
     // Stage management
     @Published var stages: [SDApplicationStage] = []
-    
-    // FIX 4: No longer need stagesToDelete - we mark stages as deleted in place
-    
+        
     @Published var showingStageSection = false
     @Published var isEditingExistingStage = false
     @Published var tempStageData: TempStageData = TempStageData()
@@ -141,7 +139,6 @@ class EditApplicationViewModel: ObservableObject {
         tempStageData = TempStageData()
     }
     
-    // FIX 1 & 4: Unified soft delete logic - always mark as deleted, never remove from array
     func deleteStages(at offsets: IndexSet) {
         for offset in offsets {
             let stage = stages[offset]
@@ -153,7 +150,6 @@ class EditApplicationViewModel: ObservableObject {
             print("2 at delete stage func checking: \(stage.stageRawValue) with deleted value \(stage.isDeleted), \(stage.needsSync)")
         }
         
-        // FIX 4: Remove from UI array only (stages remain in database as soft-deleted)
         stages.remove(atOffsets: offsets)
         
         // Update sort order for remaining stages
@@ -163,7 +159,6 @@ class EditApplicationViewModel: ObservableObject {
     }
     
     // MARK: - Save/Delete Application
-    
     func deleteApplication() async {
         guard let app = application else { return }
         
@@ -200,7 +195,7 @@ class EditApplicationViewModel: ObservableObject {
                 try await repository.updateApplication(existingApp)
                 savedApp = existingApp
 
-                // Step 1: Find stages that exist in database but not in ViewModel (were deleted)
+                // Find stages that exist in database but not in ViewModel (were deleted)
                 let allDatabaseStages = existingApp.stages ?? []
                 let viewModelStageIds = Set(stages.map { $0.id })
                 
@@ -208,7 +203,7 @@ class EditApplicationViewModel: ObservableObject {
                     // If database stage is not in ViewModel's stages array, it was deleted
                     if !viewModelStageIds.contains(dbStage.id) {
                         print("Stage deleted from working copy, marking original: \(dbStage.stage.rawValue)")
-                        // Mark the ORIGINAL database entity as deleted
+                        // Mark the original database entity as deleted
                         dbStage.isDeleted = true
                         dbStage.updatedAt = Date()
                         dbStage.needsSync = true
@@ -218,7 +213,7 @@ class EditApplicationViewModel: ObservableObject {
                     }
                 }
                 
-                // Step 2: Update or create stages from ViewModel
+                // Update or create stages from ViewModel
                 for vmStage in stages where !vmStage.isDeleted {
                     if vmStage.firestoreId != nil || vmStage.application != nil {
                         // Existing stage - find the original and update it
@@ -232,7 +227,7 @@ class EditApplicationViewModel: ObservableObject {
                             try await repository.updateStage(originalStage)
                         }
                     } else {
-                        // New stage - create it
+                        // New stage so create it
                         let _ = try await repository.createStage(
                             for: savedApp,
                             stage: vmStage.stage,
@@ -245,7 +240,7 @@ class EditApplicationViewModel: ObservableObject {
                 }
                 
             } else {
-                // Create new application (no changes needed here)
+                // Create new application
                 savedApp = try await repository.createApplication(
                     role: role.trimmingCharacters(in: .whitespaces),
                     company: company.trimmingCharacters(in: .whitespaces),
@@ -255,7 +250,7 @@ class EditApplicationViewModel: ObservableObject {
                     note: note.trimmingCharacters(in: .whitespaces)
                 )
                 
-                // Create all non-deleted stages
+                // Create all non deleted stages
                 for stage in stages where !stage.isDeleted {
                     let _ = try await repository.createStage(
                         for: savedApp,
@@ -279,9 +274,7 @@ class EditApplicationViewModel: ObservableObject {
     }
     
     // MARK: - Intelligent Stage Defaults
-    
     func getDefaultStageAndStatus() -> (stage: StageType, status: StageStatus) {
-        // FIX 1: Only consider non-deleted stages
         let activeStages = stages.filter { !$0.isDeleted }
         
         if activeStages.isEmpty {

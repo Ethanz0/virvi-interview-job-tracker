@@ -171,9 +171,9 @@ class FirestoreApplicationRepository {
         }
         
         if let match = match {
-            print("✓ Found existing cloud app: \(company) (ID: \(match.id ?? "unknown"))")
+            print("Found existing cloud app: \(company) (ID: \(match.id ?? "unknown"))")
         } else if !applications.isEmpty {
-            print("⚠️ Found apps with same company/role but different dates")
+            print("Found apps with same company/role but different dates")
         }
         
         return match

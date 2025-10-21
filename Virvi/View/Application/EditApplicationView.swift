@@ -124,7 +124,7 @@ struct EditApplicationView: View {
                     }
                     .onDelete { offsets in
                         Task{
-                            await viewModel.deleteStages(at: offsets)
+                            viewModel.deleteStages(at: offsets)
 
                         }
                     }

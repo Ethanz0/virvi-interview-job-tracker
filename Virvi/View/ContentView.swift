@@ -79,12 +79,6 @@ struct ContentView: View {
         }
         .onAppear {
             scheduleBackgroundTask()
-//            print("SwiftData DB Location: \(URL.applicationSupportDirectory.path())")
-//            let dirPaths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
-//
-//            let docsDir = dirPaths[0]
-//
-//            print(docsDir)
             print(dependencies.modelContext.sqliteCommand)
 
         }

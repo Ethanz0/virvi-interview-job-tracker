@@ -33,7 +33,7 @@ class ApplicationsListViewModel: ObservableObject {
         
         if let syncManager = syncManager {
             syncCancellable = syncManager.$isSyncing
-                .dropFirst()  // Skip initial value
+                .dropFirst()
                 .sink { [weak self] isSyncing in
                     if !isSyncing {
                         Task { @MainActor [weak self] in
