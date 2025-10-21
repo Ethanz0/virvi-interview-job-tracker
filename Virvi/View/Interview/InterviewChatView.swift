@@ -2,7 +2,7 @@
 //  InterviewChatView.swift
 //  Virvi
 //
-//  Updated to show feedback in dynamic mode
+//  Updated with network monitoring banner and alert
 //
 
 import SwiftUI
@@ -40,8 +40,12 @@ struct InterviewChatView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = InterviewViewModel()
+    @StateObject private var networkMonitor = NetworkMonitor()
     @State private var permissionsGranted = false
     @State private var showingPermissionAlert = false
+    @State private var showingNetworkAlert = false
+    @State private var loadingStartTime = Date()
+    @State private var showTimeoutWarning = false
     
     init(interview: Interview,
          isReviewMode: Bool = false,
@@ -62,6 +66,10 @@ struct InterviewChatView: View {
                 progressView
             }
             
+            if !networkMonitor.isConnected && isDynamicMode && !isReviewMode {
+                networkWarningBanner
+            }
+            
             ScrollView {
                 VStack(spacing: 12) {
                     let questionsToShow = isReviewMode ? viewModel.questions : viewModel.visibleQuestions
@@ -77,7 +85,6 @@ struct InterviewChatView: View {
                             .id(question.id)
                         }
                         
-                        // Show feedback if available (for both review and completed interviews)
                         if let feedback = viewModel.feedbackMessage {
                             FeedbackBubble(feedback: feedback)
                         }
@@ -96,6 +103,7 @@ struct InterviewChatView: View {
         .navigationBarBackButtonHidden(!isReviewMode)
         .toolbar(isReviewMode ? .visible : .hidden, for: .tabBar)
         .onAppear {
+            loadingStartTime = Date()
             viewModel.setup(with: interview,
                           modelContext: modelContext,
                           isDynamicMode: isDynamicMode)
@@ -104,6 +112,15 @@ struct InterviewChatView: View {
                 Task {
                     permissionsGranted = await viewModel.videoVM.requestPermissions()
                 }
+                
+                if isDynamicMode {
+                    startTimeoutMonitoring()
+                }
+            }
+        }
+        .onChange(of: networkMonitor.isConnected) { _, isConnected in
+            if !isConnected && isDynamicMode && !isReviewMode {
+                showingNetworkAlert = true
             }
         }
         .toolbar {
@@ -125,6 +142,11 @@ struct InterviewChatView: View {
         } message: {
             Text("Please grant camera and microphone permissions in Settings to record your interview.")
         }
+        .alert("No Internet Connection", isPresented: $showingNetworkAlert) {
+            Button("OK") { }
+        } message: {
+            Text("An internet connection is required for AI-generated questions. Please connect to Wi-Fi or cellular data.")
+        }
         .fullScreenCover(isPresented: $viewModel.showingCamera) {
             VideoPicker(
                 videoURL: $viewModel.recordedVideoURL,
@@ -139,6 +161,20 @@ struct InterviewChatView: View {
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private var networkWarningBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "wifi.slash")
+                .foregroundColor(.white)
+            Text("No Internet Connection")
+                .font(.subheadline)
+                .foregroundColor(.white)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(Color.red)
     }
     
     @ViewBuilder
@@ -235,6 +271,23 @@ struct InterviewChatView: View {
             Text(isDynamicMode ? "Generating first question" : "Loading questions")
                 .font(.caption)
                 .foregroundColor(.secondary)
+            
+            if showTimeoutWarning {
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                        .font(.title2)
+                    
+                    Text("This is taking longer than usual")
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
+                    
+                    Text("Please check your internet connection")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top, 12)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 60)
@@ -261,6 +314,16 @@ struct InterviewChatView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+    }
+    
+    private func startTimeoutMonitoring() {
+        Task {
+            try? await Task.sleep(nanoseconds: 20_000_000_000)
+            
+            if viewModel.visibleQuestions.isEmpty && viewModel.isGeneratingQuestion {
+                showTimeoutWarning = true
+            }
+        }
     }
 }
 

@@ -2,7 +2,7 @@
 //  InterviewViewModel.swift
 //  Virvi
 //
-//  Updated to expose feedback message
+//  Created by Ethan Zhang on 5/10/2025.
 //
 
 import SwiftUI
@@ -59,11 +59,9 @@ class InterviewViewModel: ObservableObject {
     }
     
     var feedbackMessage: String? {
-        // First check if the interview itself has feedback stored
         if let feedback = interview?.feedback {
             return feedback
         }
-        // Otherwise check the dynamic strategy's current feedback
         if let dynamicStrategy = strategy as? DynamicInterviewStrategy {
             return dynamicStrategy.feedbackMessage
         }

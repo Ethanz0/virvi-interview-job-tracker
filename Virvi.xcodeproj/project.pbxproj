@@ -110,6 +110,7 @@
 				ViewModel/Interview/Chat/Coordinator/InterviewViewModel.swift,
 				ViewModel/Interview/Other/CompletedInterviewsViewModel.swift,
 				ViewModel/Interview/Other/InterviewFormViewModel.swift,
+				ViewModel/Interview/Other/NetworkMonitor.swift,
 				ViewModel/Interview/Other/QuestionListViewModel.swift,
 				ViewModel/Interview/Other/VideoViewModel.swift,
 				ViewModel/Login/AuthViewModel.swift,

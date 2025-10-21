@@ -2,7 +2,7 @@
 //  DynamicInterviewStrategy.swift
 //  Virvi
 //
-//  Created by Ethan Zhang on 5/10/2025.
+//  Updated with timeout and network error handling
 //
 
 import Foundation
@@ -18,6 +18,7 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
     @Published var errorMessage: String?
     @Published private var interviewCompleted: Bool = false
     @Published var feedbackMessage: String?
+    @Published var hasTimedOut: Bool = false
     
     private let ai = FirebaseAI.firebaseAI(backend: .googleAI())
     private var chat: Chat?
@@ -25,6 +26,10 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
     private var repository: InterviewRepositoryProtocol?
     private var maxQuestions: Int = 10
     private var duration: Int = 60
+    
+    // Timeout configuration
+    private let questionGenerationTimeout: TimeInterval = 10
+    private let answerProcessingTimeout: TimeInterval = 20
     
     var visibleQuestions: [Question] {
         allQuestions
@@ -90,6 +95,7 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
     private func startInterview() async {
         isGeneratingQuestion = true
         errorMessage = nil
+        hasTimedOut = false
         
         do {
             guard let chat = chat else {
@@ -97,7 +103,9 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
                               userInfo: [NSLocalizedDescriptionKey: "Chat not initialized"])
             }
             
-            let response = try await chat.sendMessage("Begin the interview.")
+            let response = try await withTimeout(seconds: questionGenerationTimeout) {
+                try await chat.sendMessage("Begin the interview.")
+            }
             
             if let questionText = response.text?.trimmingCharacters(in: .whitespacesAndNewlines),
                !questionText.isEmpty {
@@ -109,6 +117,11 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
                 try? repository?.saveContext()
             }
             
+        } catch is TimeoutError {
+            hasTimedOut = true
+            errorMessage = "Question generation timed out. Please check your internet connection and try again."
+        } catch let urlError as URLError {
+            handleNetworkError(urlError)
         } catch {
             errorMessage = "Failed to generate first question: \(error.localizedDescription)"
         }
@@ -121,15 +134,14 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
         
         isProcessingAnswer = true
         errorMessage = nil
+        hasTimedOut = false
         
         currentQuestion.transcript = transcript
         currentQuestion.recordingURL = videoURL
         
         try? repository?.saveContext()
         
-        // Check if this was the last question
         if allQuestions.count >= maxQuestions {
-            // Generate final feedback instead of another question
             await generateFinalFeedback()
             endInterview()
             isProcessingAnswer = false
@@ -143,6 +155,7 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
     private func generateNextQuestion(answer: String) async {
         isGeneratingQuestion = true
         errorMessage = nil
+        hasTimedOut = false
         
         do {
             guard let chat = chat else {
@@ -157,7 +170,9 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
             Questions remaining: \(maxQuestions - allQuestions.count)
             """
             
-            let response = try await chat.sendMessage(prompt)
+            let response = try await withTimeout(seconds: questionGenerationTimeout) {
+                try await chat.sendMessage(prompt)
+            }
             
             if let questionText = response.text?.trimmingCharacters(in: .whitespacesAndNewlines) {
                 let nextQuestion = Question(
@@ -172,6 +187,11 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
                 try? repository?.saveContext()
             }
             
+        } catch is TimeoutError {
+            hasTimedOut = true
+            errorMessage = "Question generation timed out. Please check your internet connection and try again."
+        } catch let urlError as URLError {
+            handleNetworkError(urlError)
         } catch {
             errorMessage = "Failed to generate next question: \(error.localizedDescription)"
         }
@@ -182,6 +202,7 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
     private func generateFinalFeedback() async {
         isGeneratingQuestion = true
         errorMessage = nil
+        hasTimedOut = false
         
         do {
             guard let chat = chat else {
@@ -200,16 +221,21 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
             Keep the feedback concise (2-3 short paragraphs, each under 50 words) and professional.
             """
             
-            let response = try await chat.sendMessage(feedbackPrompt)
+            let response = try await withTimeout(seconds: answerProcessingTimeout) {
+                try await chat.sendMessage(feedbackPrompt)
+            }
             
             if let feedback = response.text?.trimmingCharacters(in: .whitespacesAndNewlines) {
                 feedbackMessage = feedback
-                
-                // Store feedback directly on the interview object
                 interview?.feedback = feedback
                 try? repository?.saveContext()
             }
             
+        } catch is TimeoutError {
+            hasTimedOut = true
+            errorMessage = "Feedback generation timed out. The interview has been saved without AI feedback."
+        } catch let urlError as URLError {
+            handleNetworkError(urlError)
         } catch {
             errorMessage = "Failed to generate feedback: \(error.localizedDescription)"
         }
@@ -217,10 +243,56 @@ class DynamicInterviewStrategy: InterviewStrategy, ObservableObject {
         isGeneratingQuestion = false
     }
     
+    private func handleNetworkError(_ error: URLError) {
+        switch error.code {
+        case .notConnectedToInternet:
+            errorMessage = "No internet connection. Please connect to the internet and try again."
+        case .networkConnectionLost:
+            errorMessage = "Network connection lost. Please check your connection and try again."
+        case .timedOut:
+            hasTimedOut = true
+            errorMessage = "Request timed out. Please check your internet connection."
+        default:
+            errorMessage = "Network error: \(error.localizedDescription)"
+        }
+    }
+    
+    func retryCurrentOperation() async {
+        if allQuestions.isEmpty {
+            await startInterview()
+        } else if let lastQuestion = allQuestions.last,
+                  lastQuestion.transcript != nil {
+            await generateNextQuestion(answer: lastQuestion.transcript ?? "")
+        }
+    }
+    
     func endInterview() {
         interviewCompleted = true
         interview?.completed = true
         interview?.completionDate = Date()
         try? repository?.saveContext()
+    }
+}
+
+// MARK: - Timeout Helper
+
+struct TimeoutError: Error {
+    let message: String = "Operation timed out"
+}
+
+func withTimeout<T>(seconds: TimeInterval, operation: @escaping () async throws -> T) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask {
+            try await operation()
+        }
+        
+        group.addTask {
+            try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            throw TimeoutError()
+        }
+        
+        let result = try await group.next()!
+        group.cancelAll()
+        return result
     }
 }
