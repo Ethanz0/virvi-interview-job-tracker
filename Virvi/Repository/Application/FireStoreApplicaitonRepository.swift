@@ -2,8 +2,7 @@
 //  FirestoreApplicationRepository.swift
 //  Virvi
 //
-//  This repository is used ONLY by SyncManager for Firebase syncing
-//  The main app uses SwiftDataApplicationRepository instead
+//  Created by Ethan Zhang on 5/10/2025.
 //
 
 import Foundation

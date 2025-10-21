@@ -2,6 +2,8 @@
 //  ApplicationsListViewModel.swift
 //  Virvi
 //
+//  Created by Ethan Zhang on 5/10/2025.
+//
 
 import SwiftUI
 import Combine

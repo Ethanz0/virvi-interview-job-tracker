@@ -1,3 +1,10 @@
+//
+//  SDApplication.swift
+//  Virvi
+//
+//  Created by Ethan Zhang on 5/10/2025.
+//
+
 import Foundation
 import SwiftData
 import FirebaseFirestore

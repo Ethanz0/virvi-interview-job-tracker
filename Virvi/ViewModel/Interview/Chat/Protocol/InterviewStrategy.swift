@@ -5,14 +5,6 @@
 //  Created by Ethan Zhang on 20/10/2025.
 //
 
-
-//
-//  InterviewStrategy.swift
-//  Virvi
-//
-//  Protocol for handling different interview types
-//
-
 import Foundation
 import SwiftData
 

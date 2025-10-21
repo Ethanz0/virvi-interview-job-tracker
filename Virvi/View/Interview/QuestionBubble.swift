@@ -2,7 +2,7 @@
 //  QuestionBubble.swift
 //  Virvi
 //
-//  Updated to use URL type for video
+//  Created by Ethan Zhang on 5/10/2025.
 //
 
 import SwiftUI

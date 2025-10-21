@@ -1,3 +1,10 @@
+//
+//  EditApplicationViewModel.swift
+//  Virvi
+//
+//  Created by Ethan Zhang on 5/10/2025.
+//
+
 import SwiftUI
 
 /// ViewModel for editing and creating applications

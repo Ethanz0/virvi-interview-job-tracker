@@ -2,7 +2,7 @@
 //  InterviewRepository.swift
 //  Virvi
 //
-//  Repository pattern for Interview CRUD operations
+//  Created by Ethan Zhang on 5/10/2025.
 //
 
 import Foundation
