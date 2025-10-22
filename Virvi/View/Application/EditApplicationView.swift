@@ -77,10 +77,10 @@ struct EditApplicationView: View {
     
     private var jobDetailsSection: some View {
         Section("Job Details") {
-            TextField("Job Role", text: $viewModel.role)
+            TextField("Company", text: $viewModel.company)
                 .textInputAutocapitalization(.words)
             
-            TextField("Company", text: $viewModel.company)
+            TextField("Job Role", text: $viewModel.role)
                 .textInputAutocapitalization(.words)
             
             DatePicker("Date Applied", selection: $viewModel.date, displayedComponents: .date)
@@ -149,7 +149,7 @@ struct EditApplicationView: View {
                     
                     DatePicker("Date", selection: $viewModel.tempStageData.date, displayedComponents: .date)
                     
-                    TextField("Additional notes (optional)", text: $viewModel.tempStageData.note)
+                    TextField("Additional notes", text: $viewModel.tempStageData.note)
                     
                     HStack {
                         HStack {
@@ -201,8 +201,8 @@ struct EditApplicationView: View {
     // MARK: - Notes Section
     
     private var notesSection: some View {
-        Section("Additional Notes") {
-            TextField("Notes (optional)", text: $viewModel.note, axis: .vertical)
+        Section("Notes") {
+            TextField("", text: $viewModel.note, axis: .vertical)
                 .lineLimit(3...6)
         }
     }

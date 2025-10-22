@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		9450CEDA2EA883F600D4B08E /* GeminiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9450CEA02EA883F600D4B08E /* GeminiService.swift */; };
-		9450CF212EA883F600D4B08E /* GeminiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9450CEA02EA883F600D4B08E /* GeminiService.swift */; };
 		9450CF4C2EA8899700D4B08E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AC2E99015F00F996BF /* WidgetKit.framework */; };
 		9450CF4D2EA8899700D4B08E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AE2E99015F00F996BF /* SwiftUI.framework */; };
 		9450CF582EA8899800D4B08E /* widgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9450CF4B2EA8899700D4B08E /* widgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -32,13 +31,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 9450CF4A2EA8899700D4B08E;
 			remoteInfo = widgetExtension;
-		};
-		94BB6A9D2E9A517000061180 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 942FEE9B2E5CA7CD00637F70 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 942FEEA22E5CA7CD00637F70;
-			remoteInfo = Virvi;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -64,7 +56,6 @@
 		94533DC62EA64E6C000F7FE6 /* InterviewQuestionWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InterviewQuestionWidgetExtension.entitlements; sourceTree = "<group>"; };
 		9458C2AC2E99015F00F996BF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		9458C2AE2E99015F00F996BF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		94BB6A992E9A517000061180 /* VirviTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VirviTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -82,46 +73,6 @@
 			);
 			target = 9450CF4A2EA8899700D4B08E /* widgetExtension */;
 		};
-		94BB6AA32E9A51B200061180 /* Exceptions for "Virvi" folder in "VirviTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Enums/Statuses.swift,
-				FirebaseManager.swift,
-				Model/AppUser.swift,
-				Model/FSApplication.swift,
-				Model/Interview.swift,
-				Model/SDApplication.swift,
-				Repository/Application/ApplicationRepository.swift,
-				Repository/Application/FireStoreApplicationRepository.swift,
-				Repository/Application/MockApplicationRepository.swift,
-				Repository/Application/SwiftDataApplicationRepository.swift,
-				Repository/Application/SyncManager.swift,
-				Services/AuthServicing.swift,
-				View/Application/ApplicationRowView.swift,
-				View/Application/ApplicationsListView.swift,
-				View/Application/EditApplicationView.swift,
-				View/Application/StageTimelineView.swift,
-				View/ContentView.swift,
-				View/Interview/CompletedInterviewsView.swift,
-				View/Interview/InterviewChatView.swift,
-				View/Interview/InterviewForm.swift,
-				View/Interview/QuestionBubble.swift,
-				View/Login/ProfileView.swift,
-				View/Logo/LogoCustomLayout.swift,
-				View/Logo/LogoSymbol.swift,
-				View/Logo/VirviLogoView.swift,
-				ViewModel/Application/ApplicationsListViewModel.swift,
-				ViewModel/Application/EditApplicationViewModel.swift,
-				ViewModel/Interview/Chat/Coordinator/InterviewViewModel.swift,
-				ViewModel/Interview/Other/CompletedInterviewsViewModel.swift,
-				ViewModel/Interview/Other/InterviewFormViewModel.swift,
-				ViewModel/Interview/Other/NetworkMonitor.swift,
-				ViewModel/Interview/Other/QuestionListViewModel.swift,
-				ViewModel/Interview/Other/VideoViewModel.swift,
-				ViewModel/Login/AuthViewModel.swift,
-			);
-			target = 94BB6A982E9A517000061180 /* VirviTests */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -129,7 +80,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				94459E582E8D3A3E00DC67D2 /* Exceptions for "Virvi" folder in "Virvi" target */,
-				94BB6AA32E9A51B200061180 /* Exceptions for "Virvi" folder in "VirviTests" target */,
 			);
 			path = Virvi;
 			sourceTree = "<group>";
@@ -140,11 +90,6 @@
 				9450CF5C2EA8899800D4B08E /* Exceptions for "widget" folder in "widgetExtension" target */,
 			);
 			path = widget;
-			sourceTree = "<group>";
-		};
-		94BB6A9A2E9A517000061180 /* VirviTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VirviTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -175,13 +120,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		94BB6A962E9A517000061180 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -191,7 +129,6 @@
 				94533DC62EA64E6C000F7FE6 /* InterviewQuestionWidgetExtension.entitlements */,
 				94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */,
 				942FEEA52E5CA7CD00637F70 /* Virvi */,
-				94BB6A9A2E9A517000061180 /* VirviTests */,
 				9450CF4E2EA8899700D4B08E /* widget */,
 				9458C2AB2E99015F00F996BF /* Frameworks */,
 				942FEEA42E5CA7CD00637F70 /* Products */,
@@ -203,7 +140,6 @@
 			isa = PBXGroup;
 			children = (
 				942FEEA32E5CA7CD00637F70 /* Virvi.app */,
-				94BB6A992E9A517000061180 /* VirviTests.xctest */,
 				9450CF4B2EA8899700D4B08E /* widgetExtension.appex */,
 			);
 			name = Products;
@@ -276,29 +212,6 @@
 			productReference = 9450CF4B2EA8899700D4B08E /* widgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		94BB6A982E9A517000061180 /* VirviTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 94BB6A9F2E9A517000061180 /* Build configuration list for PBXNativeTarget "VirviTests" */;
-			buildPhases = (
-				94BB6A952E9A517000061180 /* Sources */,
-				94BB6A962E9A517000061180 /* Frameworks */,
-				94BB6A972E9A517000061180 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				94BB6A9E2E9A517000061180 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				94BB6A9A2E9A517000061180 /* VirviTests */,
-			);
-			name = VirviTests;
-			packageProductDependencies = (
-			);
-			productName = VirviTests;
-			productReference = 94BB6A992E9A517000061180 /* VirviTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -314,10 +227,6 @@
 					};
 					9450CF4A2EA8899700D4B08E = {
 						CreatedOnToolsVersion = 16.4;
-					};
-					94BB6A982E9A517000061180 = {
-						CreatedOnToolsVersion = 16.4;
-						TestTargetID = 942FEEA22E5CA7CD00637F70;
 					};
 				};
 			};
@@ -340,7 +249,6 @@
 			projectRoot = "";
 			targets = (
 				942FEEA22E5CA7CD00637F70 /* Virvi */,
-				94BB6A982E9A517000061180 /* VirviTests */,
 				9450CF4A2EA8899700D4B08E /* widgetExtension */,
 			);
 		};
@@ -355,13 +263,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		9450CF492EA8899700D4B08E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		94BB6A972E9A517000061180 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -388,14 +289,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		94BB6A952E9A517000061180 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9450CF212EA883F600D4B08E /* GeminiService.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -403,11 +296,6 @@
 			isa = PBXTargetDependency;
 			target = 9450CF4A2EA8899700D4B08E /* widgetExtension */;
 			targetProxy = 9450CF562EA8899800D4B08E /* PBXContainerItemProxy */;
-		};
-		94BB6A9E2E9A517000061180 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 942FEEA22E5CA7CD00637F70 /* Virvi */;
-			targetProxy = 94BB6A9D2E9A517000061180 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -546,25 +434,31 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Virvi/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record interview responses";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record audio for interview";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe your responses";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				PRODUCT_BUNDLE_IDENTIFIER = com.virvi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -581,25 +475,31 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Virvi/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Record interview responses";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record audio for interview";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Transcribe your responses";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.virvi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -625,9 +525,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.virvi.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -653,45 +557,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.virvi.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		94BB6AA02E9A517000061180 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AC69R9P379;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Ethan.VirviTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Virvi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Virvi";
-			};
-			name = Debug;
-		};
-		94BB6AA12E9A517000061180 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AC69R9P379;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Ethan.VirviTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Virvi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Virvi";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -721,15 +593,6 @@
 			buildConfigurations = (
 				9450CF5A2EA8899800D4B08E /* Debug */,
 				9450CF5B2EA8899800D4B08E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		94BB6A9F2E9A517000061180 /* Build configuration list for PBXNativeTarget "VirviTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				94BB6AA02E9A517000061180 /* Debug */,
-				94BB6AA12E9A517000061180 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
