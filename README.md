@@ -13,13 +13,14 @@ A native iOS app that helps job seekers prepare for interviews and track their a
 
 ## Tech Stack
 
-- **SwiftUI** - Modern declarative UI framework
+- **SwiftUI** - UI framework
 - **SwiftData** - Local data persistence
 - **Firebase**
   - Authentication (Google Sign-In)
   - Firestore (cloud sync)
   - Gemini AI (question generation and feedback)
 - **WidgetKit** - Home screen widgets
+- **UIKit** - Camera Recordings
 
 ## Requirements
 
@@ -31,8 +32,8 @@ A native iOS app that helps job seekers prepare for interviews and track their a
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/virvi.git
-cd virvi
+git clone https://github.com/Ethanz0/virvi-interview-job-tracker
+cd virvi-interview-job-tracker
 ```
 
 2. Open the project in Xcode
