@@ -15,6 +15,7 @@
 		9450CF612EA88A1100D4B08E /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 9450CF602EA88A1100D4B08E /* FirebaseAI */; };
 		9450CF6A2EA8951400D4B08E /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 9450CF692EA8951400D4B08E /* FirebaseAppCheck */; };
 		9450CF6C2EA8952A00D4B08E /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 9450CF6B2EA8952A00D4B08E /* FirebaseAppCheck */; };
+		9450CF6E2EA8E71200D4B08E /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 9450CF6D2EA8E70C00D4B08E /* LICENSE */; };
 		94533DC32EA64D31000F7FE6 /* SharedQuestionCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */; };
 		94BB6A8E2E99402C00061180 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 94BB6A8D2E99402C00061180 /* FirebaseAI */; };
 		94DBB29B2E8E00D30063C00B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB29A2E8E00D30063C00B /* FirebaseAuth */; };
@@ -52,6 +53,7 @@
 		942FEEA32E5CA7CD00637F70 /* Virvi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Virvi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9450CEA02EA883F600D4B08E /* GeminiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiService.swift; sourceTree = "<group>"; };
 		9450CF4B2EA8899700D4B08E /* widgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9450CF6D2EA8E70C00D4B08E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedQuestionCache.swift; sourceTree = "<group>"; };
 		94533DC62EA64E6C000F7FE6 /* InterviewQuestionWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InterviewQuestionWidgetExtension.entitlements; sourceTree = "<group>"; };
 		9458C2AC2E99015F00F996BF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -126,6 +128,7 @@
 		942FEE9A2E5CA7CD00637F70 = {
 			isa = PBXGroup;
 			children = (
+				9450CF6D2EA8E70C00D4B08E /* LICENSE */,
 				94533DC62EA64E6C000F7FE6 /* InterviewQuestionWidgetExtension.entitlements */,
 				94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */,
 				942FEEA52E5CA7CD00637F70 /* Virvi */,
@@ -259,6 +262,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9450CF6E2EA8E71200D4B08E /* LICENSE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
