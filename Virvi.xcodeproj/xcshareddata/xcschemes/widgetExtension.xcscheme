@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1640"
+   wasCreatedForAppExtension = "YES"
    version = "2.0">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,9 +16,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9458C2A92E99015F00F996BF"
-               BuildableName = "InterviewQuestionWidgetExtension.appex"
-               BlueprintName = "InterviewQuestionWidgetExtension"
+               BlueprintIdentifier = "9450CF4A2EA8899700D4B08E"
+               BuildableName = "widgetExtension.appex"
+               BlueprintName = "widgetExtension"
                ReferencedContainer = "container:Virvi.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -43,19 +44,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
-      <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "94BB6A982E9A517000061180"
-               BuildableName = "VirviTests.xctest"
-               BlueprintName = "VirviTests"
-               ReferencedContainer = "container:Virvi.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -69,8 +57,18 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.springboard">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "9450CF4A2EA8899700D4B08E"
+            BuildableName = "widgetExtension.appex"
+            BlueprintName = "widgetExtension"
+            ReferencedContainer = "container:Virvi.xcodeproj">
+         </BuildableReference>
+      </RemoteRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "942FEEA22E5CA7CD00637F70"
@@ -78,7 +76,7 @@
             BlueprintName = "Virvi"
             ReferencedContainer = "container:Virvi.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "_XCWidgetKind"

@@ -77,41 +77,26 @@ struct ContentView: View {
                 }
                 .tag(3)
         }
-        .onAppear {
-            scheduleBackgroundTask()
-            print(dependencies.modelContext.sqliteCommand)
+//        .onAppear {
+//            print(dependencies.modelContext.sqliteCommand)
+//
+//        }
+    }
 
-        }
-        .task {
-            await dependencies.questionService.updateQuestionIfNeeded()
-        }
-    }
-    
-    private func scheduleBackgroundTask() {
-        let request = BGAppRefreshTaskRequest(identifier: "com.virvi.app.refresh-question")
-        request.earliestBeginDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())
-        
-        do {
-            try BGTaskScheduler.shared.submit(request)
-            print("Background task scheduled successfully")
-        } catch {
-            print("Failed to schedule: \(error)")
-        }
-    }
     
     private func resetInterviewForm() {
         formResetTrigger = UUID()
     }
 }
-extension ModelContext {
-    var sqliteCommand: String {
-        if let url = container.configurations.first?.url.path(percentEncoded: false) {
-            "sqlite3 \"\(url)\""
-        } else {
-            "No SQLite database found."
-        }
-    }
-}
+//extension ModelContext {
+//    var sqliteCommand: String {
+//        if let url = container.configurations.first?.url.path(percentEncoded: false) {
+//            "sqlite3 \"\(url)\""
+//        } else {
+//            "No SQLite database found."
+//        }
+//    }
+//}
 #Preview {
     let container = try! ModelContainer(
         for: SDApplication.self, Interview.self,

@@ -1,4 +1,3 @@
-
 //
 //  InterviewQuestionWidget.swift
 //  InterviewQuestionWidget
@@ -9,10 +8,11 @@
 import WidgetKit
 import SwiftUI
 
-// MARK: - Updated Widget Provider
+// MARK: - Widget Provider
 
-/// Replace your existing Provider with this
 struct Provider: TimelineProvider {
+    private let geminiService = GeminiService()
+    
     func placeholder(in context: Context) -> QuestionEntry {
         QuestionEntry(
             date: Date(),
@@ -29,22 +29,39 @@ struct Provider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        // Simply read from cache - no API calls needed!
-        let question = SharedQuestionCache.getDailyQuestion()
-                      ?? "Open Virvi to see today's question"
-        
+        Task {
+            do {
+                let question = try await geminiService.generateQuestionOfTheDay()
+                let entry = QuestionEntry(date: Date(), question: question)
+                
+                // Refresh at midnight tomorrow
+                let nextMidnight = getNextMidnight()
+                let timeline = Timeline(entries: [entry], policy: .after(nextMidnight))
+                completion(timeline)
+                
+            } catch {
+                // Fallback question on error
+                let entry = QuestionEntry(
+                    date: Date(),
+                    question: "Describe a time you overcame a technical challenge."
+                )
+                
+                // Retry in 1 hour if failed
+                let retry = Date().addingTimeInterval(3600)
+                let timeline = Timeline(entries: [entry], policy: .after(retry))
+                completion(timeline)
+                
+                print("Widget failed to fetch question: \(error)")
+            }
+        }
+    }
+    
+    private func getNextMidnight() -> Date {
         let currentDate = Date()
-        let entry = QuestionEntry(date: currentDate, question: question)
-        
-        // Refresh at midnight tomorrow
         let midnight = Calendar.current.startOfDay(for: currentDate)
-        let nextMidnight = Calendar.current.date(byAdding: .day, value: 1, to: midnight)!
-        
-        let timeline = Timeline(entries: [entry], policy: .after(nextMidnight))
-        completion(timeline)
+        return Calendar.current.date(byAdding: .day, value: 1, to: midnight)!
     }
 }
-
 
 /// This view is for the widget to display the question of the day and the current day
 struct InterviewQuestionWidgetEntryView : View {
@@ -77,6 +94,7 @@ struct InterviewQuestionWidgetEntryView : View {
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
+
 struct InterviewQuestionWidget: Widget {
     let kind: String = "InterviewQuestionWidget"
     var body: some WidgetConfiguration {
@@ -85,12 +103,11 @@ struct InterviewQuestionWidget: Widget {
         }
         .configurationDisplayName("Interview Question")
         .description("Daily interview question to practice.")
-        // Only medium size widget
         .supportedFamilies([.systemMedium])
     }
 }
 
-#Preview(as: .systemSmall) {
+#Preview(as: .systemMedium) {
     InterviewQuestionWidget()
 } timeline: {
     QuestionEntry(date: .now, question: "Describe a challenging bug you fixed and how you approached it.")

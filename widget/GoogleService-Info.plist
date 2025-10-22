@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>766419567105-ucac46c31v65p84u2aqmdmqv5ouvrboa.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.766419567105-ucac46c31v65p84u2aqmdmqv5ouvrboa</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBYsVQRnILq2JcG_G-kJAnVa_I4N07lNAo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>766419567105</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.virvi.widget</string>
+	<key>PROJECT_ID</key>
+	<string>virvi-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>virvi-app.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:766419567105:ios:0d3aa8a87c3bb33a49b600</string>
+</dict>
+</plist>

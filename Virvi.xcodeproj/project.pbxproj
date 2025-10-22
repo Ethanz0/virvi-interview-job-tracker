@@ -7,11 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		94533DC22EA64D24000F7FE6 /* SharedQuestionCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */; };
+		9450CEDA2EA883F600D4B08E /* GeminiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9450CEA02EA883F600D4B08E /* GeminiService.swift */; };
+		9450CF212EA883F600D4B08E /* GeminiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9450CEA02EA883F600D4B08E /* GeminiService.swift */; };
+		9450CF4C2EA8899700D4B08E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AC2E99015F00F996BF /* WidgetKit.framework */; };
+		9450CF4D2EA8899700D4B08E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AE2E99015F00F996BF /* SwiftUI.framework */; };
+		9450CF582EA8899800D4B08E /* widgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9450CF4B2EA8899700D4B08E /* widgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9450CF5F2EA889FC00D4B08E /* GeminiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9450CEA02EA883F600D4B08E /* GeminiService.swift */; };
+		9450CF612EA88A1100D4B08E /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 9450CF602EA88A1100D4B08E /* FirebaseAI */; };
+		9450CF6A2EA8951400D4B08E /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 9450CF692EA8951400D4B08E /* FirebaseAppCheck */; };
+		9450CF6C2EA8952A00D4B08E /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 9450CF6B2EA8952A00D4B08E /* FirebaseAppCheck */; };
 		94533DC32EA64D31000F7FE6 /* SharedQuestionCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */; };
-		9458C2AD2E99015F00F996BF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AC2E99015F00F996BF /* WidgetKit.framework */; };
-		9458C2AF2E99015F00F996BF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9458C2AE2E99015F00F996BF /* SwiftUI.framework */; };
-		9458C2BA2E99016100F996BF /* InterviewQuestionWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		94BB6A8E2E99402C00061180 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 94BB6A8D2E99402C00061180 /* FirebaseAI */; };
 		94DBB29B2E8E00D30063C00B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB29A2E8E00D30063C00B /* FirebaseAuth */; };
 		94DBB29D2E8E00D30063C00B /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 94DBB29C2E8E00D30063C00B /* FirebaseCore */; };
@@ -21,12 +26,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9458C2B82E99016100F996BF /* PBXContainerItemProxy */ = {
+		9450CF562EA8899800D4B08E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 942FEE9B2E5CA7CD00637F70 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9458C2A92E99015F00F996BF;
-			remoteInfo = InterviewQuestionWidgetExtension;
+			remoteGlobalIDString = 9450CF4A2EA8899700D4B08E;
+			remoteInfo = widgetExtension;
 		};
 		94BB6A9D2E9A517000061180 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -44,7 +49,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				9458C2BA2E99016100F996BF /* InterviewQuestionWidgetExtension.appex in Embed Foundation Extensions */,
+				9450CF582EA8899800D4B08E /* widgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -53,9 +58,10 @@
 
 /* Begin PBXFileReference section */
 		942FEEA32E5CA7CD00637F70 /* Virvi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Virvi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9450CEA02EA883F600D4B08E /* GeminiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiService.swift; sourceTree = "<group>"; };
+		9450CF4B2EA8899700D4B08E /* widgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedQuestionCache.swift; sourceTree = "<group>"; };
 		94533DC62EA64E6C000F7FE6 /* InterviewQuestionWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InterviewQuestionWidgetExtension.entitlements; sourceTree = "<group>"; };
-		9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = InterviewQuestionWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9458C2AC2E99015F00F996BF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		9458C2AE2E99015F00F996BF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		94BB6A992E9A517000061180 /* VirviTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VirviTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -69,12 +75,12 @@
 			);
 			target = 942FEEA22E5CA7CD00637F70 /* Virvi */;
 		};
-		9458C2BF2E99016100F996BF /* Exceptions for "InterviewQuestionWidget" folder in "InterviewQuestionWidgetExtension" target */ = {
+		9450CF5C2EA8899800D4B08E /* Exceptions for "widget" folder in "widgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */;
+			target = 9450CF4A2EA8899700D4B08E /* widgetExtension */;
 		};
 		94BB6AA32E9A51B200061180 /* Exceptions for "Virvi" folder in "VirviTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -91,7 +97,6 @@
 				Repository/Application/SwiftDataApplicationRepository.swift,
 				Repository/Application/SyncManager.swift,
 				Services/AuthServicing.swift,
-				Services/GeminiService.swift,
 				View/Application/ApplicationRowView.swift,
 				View/Application/ApplicationsListView.swift,
 				View/Application/EditApplicationView.swift,
@@ -129,12 +134,12 @@
 			path = Virvi;
 			sourceTree = "<group>";
 		};
-		9458C2B02E99015F00F996BF /* InterviewQuestionWidget */ = {
+		9450CF4E2EA8899700D4B08E /* widget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				9458C2BF2E99016100F996BF /* Exceptions for "InterviewQuestionWidget" folder in "InterviewQuestionWidgetExtension" target */,
+				9450CF5C2EA8899800D4B08E /* Exceptions for "widget" folder in "widgetExtension" target */,
 			);
-			path = InterviewQuestionWidget;
+			path = widget;
 			sourceTree = "<group>";
 		};
 		94BB6A9A2E9A517000061180 /* VirviTests */ = {
@@ -153,17 +158,20 @@
 				94DBB29D2E8E00D30063C00B /* FirebaseCore in Frameworks */,
 				94DBB2A22E8E01230063C00B /* GoogleSignIn in Frameworks */,
 				94DBB29B2E8E00D30063C00B /* FirebaseAuth in Frameworks */,
+				9450CF6A2EA8951400D4B08E /* FirebaseAppCheck in Frameworks */,
 				94DBB29F2E8E00D30063C00B /* FirebaseFirestore in Frameworks */,
 				94BB6A8E2E99402C00061180 /* FirebaseAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9458C2A72E99015F00F996BF /* Frameworks */ = {
+		9450CF482EA8899700D4B08E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9458C2AF2E99015F00F996BF /* SwiftUI.framework in Frameworks */,
-				9458C2AD2E99015F00F996BF /* WidgetKit.framework in Frameworks */,
+				9450CF6C2EA8952A00D4B08E /* FirebaseAppCheck in Frameworks */,
+				9450CF4D2EA8899700D4B08E /* SwiftUI.framework in Frameworks */,
+				9450CF4C2EA8899700D4B08E /* WidgetKit.framework in Frameworks */,
+				9450CF612EA88A1100D4B08E /* FirebaseAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,10 +191,11 @@
 				94533DC62EA64E6C000F7FE6 /* InterviewQuestionWidgetExtension.entitlements */,
 				94533DC12EA64D24000F7FE6 /* SharedQuestionCache.swift */,
 				942FEEA52E5CA7CD00637F70 /* Virvi */,
-				9458C2B02E99015F00F996BF /* InterviewQuestionWidget */,
 				94BB6A9A2E9A517000061180 /* VirviTests */,
+				9450CF4E2EA8899700D4B08E /* widget */,
 				9458C2AB2E99015F00F996BF /* Frameworks */,
 				942FEEA42E5CA7CD00637F70 /* Products */,
+				9450CEA02EA883F600D4B08E /* GeminiService.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -194,8 +203,8 @@
 			isa = PBXGroup;
 			children = (
 				942FEEA32E5CA7CD00637F70 /* Virvi.app */,
-				9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */,
 				94BB6A992E9A517000061180 /* VirviTests.xctest */,
+				9450CF4B2EA8899700D4B08E /* widgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -224,7 +233,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				9458C2B92E99016100F996BF /* PBXTargetDependency */,
+				9450CF572EA8899800D4B08E /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				942FEEA52E5CA7CD00637F70 /* Virvi */,
@@ -237,31 +246,34 @@
 				94DBB2A12E8E01230063C00B /* GoogleSignIn */,
 				94DBB2A32E8E01230063C00B /* GoogleSignInSwift */,
 				94BB6A8D2E99402C00061180 /* FirebaseAI */,
+				9450CF692EA8951400D4B08E /* FirebaseAppCheck */,
 			);
 			productName = "Interview Me";
 			productReference = 942FEEA32E5CA7CD00637F70 /* Virvi.app */;
 			productType = "com.apple.product-type.application";
 		};
-		9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */ = {
+		9450CF4A2EA8899700D4B08E /* widgetExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9458C2BE2E99016100F996BF /* Build configuration list for PBXNativeTarget "InterviewQuestionWidgetExtension" */;
+			buildConfigurationList = 9450CF592EA8899800D4B08E /* Build configuration list for PBXNativeTarget "widgetExtension" */;
 			buildPhases = (
-				9458C2A62E99015F00F996BF /* Sources */,
-				9458C2A72E99015F00F996BF /* Frameworks */,
-				9458C2A82E99015F00F996BF /* Resources */,
+				9450CF472EA8899700D4B08E /* Sources */,
+				9450CF482EA8899700D4B08E /* Frameworks */,
+				9450CF492EA8899700D4B08E /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9458C2B02E99015F00F996BF /* InterviewQuestionWidget */,
+				9450CF4E2EA8899700D4B08E /* widget */,
 			);
-			name = InterviewQuestionWidgetExtension;
+			name = widgetExtension;
 			packageProductDependencies = (
+				9450CF602EA88A1100D4B08E /* FirebaseAI */,
+				9450CF6B2EA8952A00D4B08E /* FirebaseAppCheck */,
 			);
-			productName = InterviewQuestionWidgetExtension;
-			productReference = 9458C2AA2E99015F00F996BF /* InterviewQuestionWidgetExtension.appex */;
+			productName = widgetExtension;
+			productReference = 9450CF4B2EA8899700D4B08E /* widgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		94BB6A982E9A517000061180 /* VirviTests */ = {
@@ -300,7 +312,7 @@
 					942FEEA22E5CA7CD00637F70 = {
 						CreatedOnToolsVersion = 16.4;
 					};
-					9458C2A92E99015F00F996BF = {
+					9450CF4A2EA8899700D4B08E = {
 						CreatedOnToolsVersion = 16.4;
 					};
 					94BB6A982E9A517000061180 = {
@@ -328,8 +340,8 @@
 			projectRoot = "";
 			targets = (
 				942FEEA22E5CA7CD00637F70 /* Virvi */,
-				9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */,
 				94BB6A982E9A517000061180 /* VirviTests */,
+				9450CF4A2EA8899700D4B08E /* widgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -342,7 +354,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9458C2A82E99015F00F996BF /* Resources */ = {
+		9450CF492EA8899700D4B08E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -363,15 +375,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9450CEDA2EA883F600D4B08E /* GeminiService.swift in Sources */,
 				94533DC32EA64D31000F7FE6 /* SharedQuestionCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9458C2A62E99015F00F996BF /* Sources */ = {
+		9450CF472EA8899700D4B08E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				94533DC22EA64D24000F7FE6 /* SharedQuestionCache.swift in Sources */,
+				9450CF5F2EA889FC00D4B08E /* GeminiService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -379,16 +392,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9450CF212EA883F600D4B08E /* GeminiService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		9458C2B92E99016100F996BF /* PBXTargetDependency */ = {
+		9450CF572EA8899800D4B08E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 9458C2A92E99015F00F996BF /* InterviewQuestionWidgetExtension */;
-			targetProxy = 9458C2B82E99016100F996BF /* PBXContainerItemProxy */;
+			target = 9450CF4A2EA8899700D4B08E /* widgetExtension */;
+			targetProxy = 9450CF562EA8899800D4B08E /* PBXContainerItemProxy */;
 		};
 		94BB6A9E2E9A517000061180 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -589,19 +603,18 @@
 			};
 			name = Release;
 		};
-		9458C2BC2E99016100F996BF /* Debug */ = {
+		9450CF5A2EA8899800D4B08E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = InterviewQuestionWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = AC69R9P379;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = InterviewQuestionWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = InterviewQuestionWidget;
+				INFOPLIST_FILE = widget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = widget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -609,7 +622,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.virvi.InterviewQuestionWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.virvi.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -618,19 +631,18 @@
 			};
 			name = Debug;
 		};
-		9458C2BD2E99016100F996BF /* Release */ = {
+		9450CF5B2EA8899800D4B08E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = InterviewQuestionWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = AC69R9P379;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = InterviewQuestionWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = InterviewQuestionWidget;
+				INFOPLIST_FILE = widget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = widget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -638,7 +650,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.virvi.InterviewQuestionWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.virvi.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -704,11 +716,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9458C2BE2E99016100F996BF /* Build configuration list for PBXNativeTarget "InterviewQuestionWidgetExtension" */ = {
+		9450CF592EA8899800D4B08E /* Build configuration list for PBXNativeTarget "widgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9458C2BC2E99016100F996BF /* Debug */,
-				9458C2BD2E99016100F996BF /* Release */,
+				9450CF5A2EA8899800D4B08E /* Debug */,
+				9450CF5B2EA8899800D4B08E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -744,6 +756,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9450CF602EA88A1100D4B08E /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		9450CF692EA8951400D4B08E /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		9450CF6B2EA8952A00D4B08E /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
 		94BB6A8D2E99402C00061180 /* FirebaseAI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 94DBB2992E8E00D30063C00B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

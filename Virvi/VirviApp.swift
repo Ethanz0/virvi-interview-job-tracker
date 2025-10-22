@@ -78,21 +78,9 @@ struct Virvi: App {
                     }
             }
             .modelContainer(sharedModelContainer)
-            .backgroundTask(.appRefresh("com.virvi.app.refresh-question")) {
-                await handleBackgroundQuestionRefresh()
-            }
+
         }
-    
-    private func handleBackgroundQuestionRefresh() async {
-        print("Background task is running!")
-        scheduleNextBackgroundRefresh()
-        
-        // Use the question service from dependencies
-        await dependencies.questionService.updateQuestionIfNeeded()
-        
-        print("Background task completed!")
-    }
-    
+
     private func scheduleNextBackgroundRefresh() {
         let request = BGAppRefreshTaskRequest(identifier: "com.virvi.app.refresh-question")
         request.earliestBeginDate = Calendar.current.date(

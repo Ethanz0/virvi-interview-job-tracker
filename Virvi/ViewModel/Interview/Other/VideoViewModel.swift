@@ -224,7 +224,7 @@ struct VideoPicker: UIViewControllerRepresentable {
         // Recorded video and not photo
         picker.mediaTypes = ["public.movie"]
         // Medium quality video to save on storage
-        picker.videoQuality = .typeMedium
+        picker.videoQuality = .typeIFrame1280x720
         // Maximum duration of video
         picker.videoMaximumDuration = maxDuration
         picker.delegate = context.coordinator

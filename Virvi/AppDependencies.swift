@@ -15,7 +15,6 @@ class AppDependencies: ObservableObject {
     let syncManager: SyncManager
     let applicationRepository: ApplicationRepository
     let authService: AuthServicing
-    let questionService: QuestionUpdateService
     
     init(modelContext: ModelContext, authService: AuthServicing? = nil) {
         self.modelContext = modelContext
@@ -31,9 +30,6 @@ class AppDependencies: ObservableObject {
             modelContext: modelContext,
             syncManager: syncManager
         )
-        
-        // Create question service
-        self.questionService = QuestionUpdateService()
     }
     
     // Helper to enable sync when user logs in

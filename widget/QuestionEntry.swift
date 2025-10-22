@@ -12,3 +12,4 @@ struct QuestionEntry: TimelineEntry {
     let date: Date
     let question: String
 }
+
