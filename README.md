@@ -1,6 +1,12 @@
-# Virvi - Interview Practice & Job Tracker
-
-A native iOS app that helps job seekers prepare for interviews and track their applications.
+<div align="center">
+  <img src="virvi-logo.png" alt="Virvi Logo" width="200"/>
+  
+  # Virvi - Interview Practice & Job Tracker
+  
+  A native iOS app that helps job seekers prepare for interviews and track their applications.
+  
+  <img src="demo.gif" alt="Virvi Demo" width="300"/>
+</div>
 
 ## Features
 
@@ -31,9 +37,16 @@ A native iOS app that helps job seekers prepare for interviews and track their a
 ## Setup
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/Ethanz0/virvi-interview-job-tracker
 cd virvi-interview-job-tracker
+```
+
+2. Open the project in Xcode
+
+```bash
+open Virvi.xcodeproj
 ```
 
 2. Open the project in Xcode
