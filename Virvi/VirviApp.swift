@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseCore
+import FirebaseAppCheck  // Add this import
 import GoogleSignIn
 import SwiftData
 import BackgroundTasks
@@ -36,7 +37,15 @@ struct Virvi: App {
     }()
     
     init() {
-        // Configure Firebase FIRST
+        // Configure App Check FIRST
+        #if DEBUG
+        let providerFactory = AppCheckDebugProviderFactory()
+        #else
+        let providerFactory = AppAttestProviderFactory()
+        #endif
+        AppCheck.setAppCheckProviderFactory(providerFactory)
+        
+        // Then configure Firebase
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }
@@ -132,3 +141,4 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
 }
+

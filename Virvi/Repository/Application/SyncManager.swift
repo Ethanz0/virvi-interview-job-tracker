@@ -166,8 +166,6 @@ class SyncManager: ObservableObject {
             }
             print("Starting sync - found pending changes")
             
-            // Push changes (including deletions) to Firestore
-            // PushDeletions now immediately hard-deletes after Firestore deletion
             await pushToFirestore(userId: userId)
             
             lastSyncDate = Date()
@@ -188,12 +186,8 @@ class SyncManager: ObservableObject {
         
         print("Starting full sync (including pull from cloud)")
         
-        // Push FIRST to sync any local changes created while offline (including deletions)
-        // PushDeletions now immediately hard-deletes after Firestore deletion
         await pushToFirestore(userId: userId)
         
-        // Then pull to get any cloud changes
-        // Deleted items are already gone, so they can't be resurrected
         await pullFromFirestore(userId: userId)
         
         lastSyncDate = Date()
@@ -297,7 +291,6 @@ class SyncManager: ObservableObject {
         )
         
         if let existingApp = try modelContext.fetch(descriptor).first {
-            // If app is marked for deletion locally, don't resurrect it from cloud
             if existingApp.isDeleted {
                 print("Skipping cloud app - locally deleted: \(cloudId)")
                 return
@@ -346,7 +339,6 @@ class SyncManager: ObservableObject {
             }
             
             if let existingStage = existingStage {
-                // If stage is marked for deletion locally, don't resurrect it from cloud
                 if existingStage.isDeleted {
                     print("Skipping cloud stage - locally deleted: \(cloudStageId)")
                     continue
@@ -415,7 +407,7 @@ class SyncManager: ObservableObject {
                     try await firestoreRepo.deleteApplication(id: firestoreId, for: userId)
                     print("Deleted app from Firestore: \(sdApp.company)")
                 }
-                // Mark as synced (will be cleaned up later)
+                // Mark as synced
                 sdApp.needsSync = false
                 sdApp.lastSyncedAt = Date()
             }
@@ -446,8 +438,6 @@ class SyncManager: ObservableObject {
             
             try modelContext.save()
             
-            // Immediately hard-delete after successful Firestore deletion
-            // This prevents resurrection during the same sync cycle
             for sdApp in deletedApps {
                 if let stages = sdApp.stages {
                     for stage in stages {
