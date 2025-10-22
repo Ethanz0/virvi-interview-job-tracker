@@ -79,7 +79,7 @@ Virvi/
 ├── Views/               # SwiftUI views
 ├── Services/            # API services (Firebase, Gemini)
 ├── Repositories/        # Data access layer
-└── Widget/  # Widget extension
+└── Widget/              # Widget extension
 ```
 
 ## Privacy Policy & Contact
