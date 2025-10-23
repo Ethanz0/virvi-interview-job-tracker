@@ -13,6 +13,7 @@
 - **Mock Interviews**: Practice with AI-generated interview questions tailored to specific roles
 - **Application Tracking**: Keep all your job applications organized in one place
 - **Interview Recording**: Record yourself answering questions (stored locally on device)
+- **Transcription**: Recordings are transcripted for ease of reviewing reponses
 - **AI Feedback**: Get instant feedback on your interview responses
 - **Cloud Sync**: Sign in with Google to backup and sync your data across devices
 - **Home Screen Widget**: Daily interview question to keep you sharp
@@ -78,7 +79,7 @@ Virvi/
 ├── Views/               # SwiftUI views
 ├── Services/            # API services (Firebase, Gemini)
 ├── Repositories/        # Data access layer
-└── Widget/  # Widget extension
+└── Widget/              # Widget extension
 ```
 
 ## Privacy Policy & Contact
