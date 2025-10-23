@@ -27,6 +27,10 @@ protocol ApplicationRepository {
     func deleteApplication(_ application: SDApplication) async throws
     func toggleStar(_ application: SDApplication) async throws
     
+    // Bulk operations
+    func deleteAllApplications() async throws
+    func getApplicationCount() async throws -> Int
+    
     // Stage CRUD
     func fetchStages(for application: SDApplication) async throws -> [SDApplicationStage]
     func createStage(for application: SDApplication, stage: StageType, status: StageStatus, date: Date, note: String, sortOrder: Int) async throws -> SDApplicationStage

@@ -1,4 +1,3 @@
-
 //
 //  ProfileView.swift
 //  Virvi
@@ -6,273 +5,261 @@
 //  Created by Ethan Zhang on 5/10/2025.
 //
 
-import CryptoKit
 import SwiftUI
+import CryptoKit
 import SwiftData
 
 struct ProfileView: View {
     @EnvironmentObject var auth: AuthViewModel
-    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var dependencies: AppDependencies
     @ObservedObject var syncManager: SyncManager
+    
     @State private var showingAccountSettings = false
     @State private var interviewCount = 0
-    @State private var showingDeleteAllAlert = false
-    private var repository: InterviewRepositoryProtocol {
-        SwiftDataInterviewRepository(modelContext: modelContext)
-    }
+    @State private var applicationCount = 0
+    @State private var isLoadingCounts = false
     
     var body: some View {
         NavigationStack {
             List {
                 if let user = auth.user {
-                    // MARK: - Profile Card
-                    Section {
-                        Button {
-                            showingAccountSettings = true
-                        } label: {
-                            HStack(spacing: 16) {
-                                Circle()
-                                    .fill(LinearGradient(
-                                        colors: gradientColors(for: user),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ))
-                                    .frame(width: 70, height: 70)
-                                    .overlay(
-                                        Text(user.firstName.prefix(1).uppercased())
-                                            .font(.title)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(.white)
-                                    )
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(user.firstName)
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.primary)
-                                    
-                                    Text(user.email)
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.vertical, 8)
-                        }
-                        .buttonStyle(.plain)
-                    }
+                    profileCardSection(user: user)
                     
-                    // MARK: - Sync Status Section
-                    Section {
-                        HStack {
-                            Image(systemName: "cloud")
-                                .foregroundColor(.blue)
-                                .frame(width: 24)
-                            Text("Cloud Sync")
-                            Spacer()
-                            if syncManager.isSyncing {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                            } else {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                            }
-                        }
-                        
-                        if let lastSync = syncManager.lastSyncDate {
-                            HStack {
-                                Image(systemName: "clock")
-                                    .foregroundColor(.secondary)
-                                    .frame(width: 24)
-                                Text("Last synced")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(lastSync, style: .relative)
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                        }
-                        
-                        if let error = syncManager.syncError {
-                            HStack(alignment: .top) {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .foregroundColor(.orange)
-                                    .frame(width: 24)
-                                Text(error)
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                        }
-                        
-                        Button {
-                            Task {
-                                await syncManager.fullSyncNow()
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: "arrow.triangle.2.circlepath")
-                                    .frame(width: 24)
-                                Text("Sync Now")
-                                Spacer()
-                            }
-                        }
-                        .disabled(syncManager.isSyncing)
-                    } header: {
-                        Text("Sync Status")
-                    } footer: {
-                        Text("Your data is automatically synced to the cloud when you're signed in.")
-                    }
+                    syncStatusSection
                     
-                    // MARK: - Data Management Section
-                    Section {
-                        HStack {
-                            Image(systemName: "chart.bar")
-                                .foregroundColor(.secondary)
-                                .frame(width: 24)
-                            Text("Interviews Stored")
-                            Spacer()
-                            Text("\(interviewCount)")
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        if interviewCount > 0 {
-                            Button {
-                                showingDeleteAllAlert = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                        .frame(width: 24)
-                                    Text("Delete All Interviews")
-                                        .foregroundColor(.red)
-                                    Spacer()
-                                }
-                            }
-                        }
-                    } header: {
-                        Text("Data Management")
-                    }
+                    dataStatsSection
                     
                 } else {
-                    // MARK: - Not Signed In Section
-                    Section {
-                        VStack(spacing: 16) {
-                            Circle()
-                                .fill(LinearGradient(
-                                    colors: [.gray.opacity(0.3), .gray.opacity(0.5)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
-                                .frame(width: 80, height: 80)
-                                .overlay(
-                                    Image(systemName: "person.fill")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.white)
-                                )
-                            
-                            Text("Using Offline Mode")
-                                .font(.headline)
-                            
-                            Text("Sign in to sync your data across devices and back it up to the cloud.")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                            
-                            Button {
-                                auth.signInWithGoogle()
-                            } label: {
-                                HStack {
-                                    Image(systemName: "globe")
-                                    Text("Sign In with Google")
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(.vertical)
-                    }
-                    
-                    // MARK: - Data Management Section
-                    Section {
-                        HStack {
-                            Image(systemName: "chart.bar")
-                                .foregroundColor(.secondary)
-                                .frame(width: 24)
-                            Text("Interviews Stored")
-                            Spacer()
-                            Text("\(interviewCount)")
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        if interviewCount > 0 {
-                            Button {
-                                showingDeleteAllAlert = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                        .frame(width: 24)
-                                    Text("Delete All Interviews")
-                                        .foregroundColor(.red)
-                                    Spacer()
-                                }
-                            }
-                        }
-                    } header: {
-                        Text("Data Management")
-                    }
+                    notSignedInSection
                 }
             }
             .navigationTitle("Profile")
-            .onAppear {
-                updateInterviewCount()
-            }
-            .alert("Delete All Interviews", isPresented: $showingDeleteAllAlert) {
-                Button("Cancel", role: .cancel) {}
-                Button("Delete All", role: .destructive) {
-                    do {
-                        try repository.deleteAll()
-                        updateInterviewCount()
-                    } catch {
-                        print("Failed to delete all interviews: \(error)")
-                    }
-                }
-            } message: {
-                Text("Are you sure you want to delete all \(interviewCount) interviews? This action cannot be undone and will delete all recordings.")
-            }
             .sheet(isPresented: $showingAccountSettings) {
                 if let user = auth.user {
                     AccountSettingsView(
                         user: user,
+                        applicationRepository: dependencies.applicationRepository,
                         syncManager: syncManager,
                         interviewCount: interviewCount,
+                        applicationCount: applicationCount,
                         onDataDeleted: {
-                            updateInterviewCount()
+                            Task {
+                                await loadDataCounts()
+                            }
                         }
                     )
                 }
             }
+            .task {
+                await loadDataCounts()
+            }
         }
     }
     
-    private func updateInterviewCount() {
-        do {
-            interviewCount = try repository.getAll().count
-        } catch {
-            interviewCount = 0
+    // MARK: - View Components
+    
+    private func profileCardSection(user: AppUser) -> some View {
+        Button {
+            showingAccountSettings = true
+        } label: {
+            Section {
+                HStack(spacing: 16) {
+                    Circle()
+                        .fill(LinearGradient(
+                            colors: gradientColors(for: user),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                        .frame(width: 70, height: 70)
+                        .overlay(
+                            Text(user.displayInitial)
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                        )
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(user.displayName)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        if !user.email.isEmpty && user.shouldShowEmail {
+                            Text(user.email)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 8)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private var syncStatusSection: some View {
+        Section {
+            HStack {
+                Image(systemName: "cloud")
+                    .foregroundColor(.blue)
+                    .frame(width: 24)
+                Text("Cloud Sync")
+                Spacer()
+                if syncManager.isSyncing {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                } else {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                }
+            }
+            
+            if let lastSync = syncManager.lastSyncDate {
+                HStack {
+                    Image(systemName: "clock")
+                        .foregroundColor(.secondary)
+                        .frame(width: 24)
+                    Text("Last synced")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(lastSync, style: .relative)
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                }
+            }
+            
+            if let error = syncManager.syncError {
+                HStack(alignment: .top) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundColor(.orange)
+                        .frame(width: 24)
+                    Text(error)
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                }
+            }
+            
+            Button {
+                Task {
+                    await syncManager.fullSyncNow()
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .frame(width: 24)
+                    Text("Sync Now")
+                    Spacer()
+                }
+            }
+            .disabled(syncManager.isSyncing)
+        } header: {
+            Text("Sync Status")
+        } footer: {
+            Text("Your job applications are automatically synced to the cloud when you're signed in.")
         }
     }
-
+    
+    private var dataStatsSection: some View {
+        Section {
+            HStack {
+                Image(systemName: "doc.text")
+                    .foregroundColor(.secondary)
+                    .frame(width: 24)
+                Text("Applications")
+                Spacer()
+                if isLoadingCounts {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                } else {
+                    Text("\(applicationCount)")
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            HStack {
+                Image(systemName: "chart.bar")
+                    .foregroundColor(.secondary)
+                    .frame(width: 24)
+                Text("Interviews")
+                Spacer()
+                if isLoadingCounts {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                } else {
+                    Text("\(interviewCount)")
+                        .foregroundColor(.secondary)
+                }
+            }
+        } header: {
+            Text("Your Data")
+        }
+    }
+    
+    private var notSignedInSection: some View {
+        Section {
+            VStack(spacing: 16) {
+                Circle()
+                    .fill(LinearGradient(
+                        colors: [.gray.opacity(0.3), .gray.opacity(0.5)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(width: 80, height: 80)
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.white)
+                    )
+                
+                Text("Using Offline Mode")
+                    .font(.headline)
+                
+                Text("Sign in to sync your job applications across devices and back it up to the cloud.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                
+                SignInWithAppleButton()
+                    .padding(.horizontal)
+                
+                GoogleSignInButton {
+                    auth.signInWithGoogle()
+                }
+                .padding(.horizontal)
+            }
+            .padding(.vertical)
+        }
+    }
+    
+    // MARK: - Data Operations
+    
+    private func loadDataCounts() async {
+        isLoadingCounts = true
+        
+        do {
+            // Load interview count using interview repository
+            let interviewRepo = SwiftDataInterviewRepository(modelContext: dependencies.modelContext)
+            let interviews = try interviewRepo.getAll()
+            interviewCount = interviews.count
+            
+            // Load application count using application repository
+            applicationCount = try await dependencies.applicationRepository.getApplicationCount()
+            
+        } catch {
+            print("Failed to load data counts: \(error)")
+        }
+        
+        isLoadingCounts = false
+    }
+    
     private func gradientColors(for user: AppUser) -> [Color] {
-        let input = user.email + user.firstName
+        let input = user.email + user.displayName
         let digest = SHA256.hash(data: Data(input.utf8))
         let bytes = Array(digest)
         
@@ -284,113 +271,150 @@ struct ProfileView: View {
             Color(hue: hue2, saturation: 0.6, brightness: 0.7)
         ]
     }
-
 }
 
+// MARK: - Account Settings View
+
 struct AccountSettingsView: View {
-    @EnvironmentObject var auth: AuthViewModel
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-    
     let user: AppUser
-    let syncManager: SyncManager
+    let applicationRepository: ApplicationRepository
+    @ObservedObject var syncManager: SyncManager
     let interviewCount: Int
+    let applicationCount: Int
     let onDataDeleted: () -> Void
     
-    @State private var showingSignOutAlert = false
-    @State private var showingDeleteAllAlert = false
-    @State private var showingDeleteAccountAlert = false
-    @State private var showingDeleteAccountError = false
-    @State private var showingReauthSheet = false
+    @EnvironmentObject var auth: AuthViewModel
+    @EnvironmentObject var dependencies: AppDependencies
+    @Environment(\.dismiss) private var dismiss
+    
     @State private var isDeletingAccount = false
+    @State private var isDeletingData = false
+    @State private var showingDeleteAccountAlert = false
+    @State private var showingDeleteDataAlert = false
+    @State private var showingSignOutAlert = false
+    @State private var showingDeleteAccountError = false
     @State private var deleteAccountError = ""
-    
-    private var repository: InterviewRepositoryProtocol {
-        SwiftDataInterviewRepository(modelContext: modelContext)
-    }
-    
-    private var applicationRepository: ApplicationRepository {
-        SwiftDataApplicationRepository(modelContext: modelContext, syncManager: syncManager)
-    }
+    @State private var showingReauthSheet = false
     
     var body: some View {
         NavigationStack {
             List {
-                // MARK: - Profile Header
+                // MARK: - Profile Section
                 Section {
-                    HStack(spacing: 16) {
-                        Circle()
-                            .fill(LinearGradient(
-                                colors: gradientColors(for: user),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
-                            .frame(width: 70, height: 70)
-                            .overlay(
-                                Text(user.firstName.prefix(1).uppercased())
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                            )
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(user.firstName)
-                                .font(.title2)
-                                .fontWeight(.bold)
-                            
-                            Text(user.email)
-                                .font(.subheadline)
+                    HStack {
+                        Image(systemName: "person.fill")
+                            .foregroundColor(.secondary)
+                            .frame(width: 24)
+                        Text("Name")
+                        Spacer()
+                        Text(user.displayName)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    if !user.email.isEmpty && user.shouldShowEmail {
+                        HStack {
+                            Image(systemName: "envelope.fill")
                                 .foregroundColor(.secondary)
+                                .frame(width: 24)
+                            Text("Email")
+                            Spacer()
+                            Text(user.email)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
                         }
                     }
-                    .padding(.vertical, 8)
+                } header: {
+                    Text("Account Information")
                 }
                 
+                // MARK: - Data Management Section
+                Section {
+                    HStack {
+                        Image(systemName: "doc.text")
+                            .foregroundColor(.secondary)
+                            .frame(width: 24)
+                        Text("Applications")
+                        Spacer()
+                        Text("\(applicationCount)")
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack {
+                        Image(systemName: "chart.bar")
+                            .foregroundColor(.secondary)
+                            .frame(width: 24)
+                        Text("Interviews")
+                        Spacer()
+                        Text("\(interviewCount)")
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Button {
+                        showingDeleteDataAlert = true
+                    } label: {
+                        HStack {
+                            if isDeletingData {
+                                ProgressView()
+                                    .frame(width: 24)
+                            } else {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                                    .frame(width: 24)
+                            }
+                            Text("Delete All Data")
+                                .foregroundColor(.red)
+                            Spacer()
+                        }
+                    }
+                    .disabled(isDeletingData)
+                } header: {
+                    Text("Data Management")
+                } footer: {
+                    Text("Delete all applications and interviews from this device and the cloud.")
+                }
                 
-                // MARK: - Account Section
+                // MARK: - Sign Out Section
                 Section {
                     Button {
                         showingSignOutAlert = true
                     } label: {
                         HStack {
                             Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .foregroundColor(.orange)
                                 .frame(width: 24)
                             Text("Sign Out")
-                                .foregroundColor(.orange)
                             Spacer()
                         }
                     }
-                } header: {
-                    Text("Sign Out")
+                } footer: {
+                    Text("Your interviews will remain on this device after signing out.")
                 }
                 
-                Section{
+                // MARK: - Danger Zone
+                Section {
                     Button {
                         showingDeleteAccountAlert = true
                     } label: {
                         HStack {
-                            Image(systemName: "trash")
-                                .foregroundColor(.red)
-                                .frame(width: 24)
+                            if isDeletingAccount {
+                                ProgressView()
+                                    .frame(width: 24)
+                            } else {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                                    .frame(width: 24)
+                            }
                             Text("Delete Account")
                                 .foregroundColor(.red)
                             Spacer()
-                            if isDeletingAccount {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                            }
                         }
                     }
                     .disabled(isDeletingAccount)
-                }
-                header: {
-                    Text("Delete Account")
+                } header: {
+                    Text("Danger Zone")
                 } footer: {
-                    Text("Deleting your account will permanently remove all your data from the cloud and this device.")
+                    Text("Permanently delete your account and all associated data. This action cannot be undone.")
                 }
             }
-            
             .navigationTitle("Account Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -402,21 +426,25 @@ struct AccountSettingsView: View {
             }
             .alert("Sign Out", isPresented: $showingSignOutAlert) {
                 Button("Cancel", role: .cancel) {}
-                Button("Sign Out", role: .destructive) {
+                Button("Sign Out") {
+                    signOut()
+                }
+            } message: {
+                Text("Your interviews will remain on this device.")
+            }
+            .alert("Delete All Data", isPresented: $showingDeleteDataAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete All", role: .destructive) {
                     Task {
-                        await syncManager.fullSyncNow()
-                        await syncManager.disableSync()
-                        auth.signOut()
-                        dismiss()
+                        await deleteAllData()
                     }
                 }
             } message: {
-                Text("You can sign in again anytime to sync your applications.")
+                Text("This will permanently delete all applications and interviews from this device and the cloud. This action cannot be undone.")
             }
-
             .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
                 Button("Cancel", role: .cancel) {}
-                Button("Delete Account", role: .destructive) {
+                Button("Delete", role: .destructive) {
                     Task {
                         await deleteAccount()
                     }
@@ -451,42 +479,80 @@ struct AccountSettingsView: View {
         }
     }
     
+    private func signOut() {
+        auth.signOut()
+        dismiss()
+    }
+    
+    private func deleteAllData() async {
+        isDeletingData = true
+        
+        do {
+            print("Deleting all local data...")
+            
+            // Delete all interviews
+            let interviewRepo = SwiftDataInterviewRepository(modelContext: dependencies.modelContext)
+            try interviewRepo.deleteAll()
+            
+            // Delete all applications
+            try await applicationRepository.deleteAllApplications()
+            
+            await syncManager.fullSyncNow()
+            
+            print("All data deleted successfully")
+            isDeletingData = false
+            onDataDeleted()
+            
+        } catch {
+            print("Failed to delete data: \(error)")
+            isDeletingData = false
+        }
+    }
+    
     private func deleteAccount() async {
         isDeletingAccount = true
         
         do {
-            // Delete all local data
-            try repository.deleteAll()
+            print("Starting account deletion process...")
             
-            let appDescriptor = FetchDescriptor<SDApplication>()
-            let allApps = try modelContext.fetch(appDescriptor)
-            for app in allApps {
-                modelContext.delete(app)
-            }
-            try modelContext.save()
+            await deleteAllData()
             
-            // Delete all cloud data (mark as deleted and sync)
-            let cloudApps = try await applicationRepository.fetchApplications()
-            for appWithStages in cloudApps {
-                try await applicationRepository.deleteApplication(appWithStages.application)
+            if let userId = auth.user?.id {
+                print("Fetching cloud applications for user \(userId)...")
+                let firestoreRepo = FirestoreApplicationRepository()
+                let cloudApps = try await firestoreRepo.fetchApplications(for: userId)
+                print("Found \(cloudApps.count) applications to delete from Firestore")
+                
+                for appWithStages in cloudApps {
+                    if let appId = appWithStages.application.id {
+                        print("Deleting cloud application: \(appId)")
+                        try await firestoreRepo.deleteApplication(id: appId, for: userId)
+                    }
+                }
             }
+            
+            print("Performing final sync...")
             await syncManager.fullSyncNow()
             
-            // Disable sync
-            await syncManager.disableSync()
+            print("Disabling sync...")
+            await dependencies.disableSync()
             
-            // Delete Firebase Auth account
+            print("Deleting Firebase Auth account...")
             try await auth.deleteAccount()
             
+            print("Account deletion completed successfully")
             isDeletingAccount = false
+            onDataDeleted()
             dismiss()
+            
         } catch let error as NSError {
             print("Failed to delete account: \(error)")
+            print("Error domain: \(error.domain), code: \(error.code)")
             isDeletingAccount = false
             
             // Check if error requires reauthentication
             if error.domain == "FIRAuthErrorDomain" && error.code == 17014 {
-                // Error code for requires recent login
+                print("Reauthentication required")
                 showingReauthSheet = true
             } else {
                 showingDeleteAccountError = true
@@ -494,21 +560,9 @@ struct AccountSettingsView: View {
             }
         }
     }
-    
-    private func gradientColors(for user: AppUser) -> [Color] {
-        let input = user.email + user.firstName
-        let digest = SHA256.hash(data: Data(input.utf8))
-        let bytes = Array(digest)
-        
-        let hue1 = Double(bytes[0]) / 255.0
-        let hue2 = Double(bytes[1]) / 255.0
-        
-        return [
-            Color(hue: hue1, saturation: 0.7, brightness: 0.8),
-            Color(hue: hue2, saturation: 0.6, brightness: 0.7)
-        ]
-    }
 }
+
+// MARK: - Reauthentication View
 
 struct ReauthenticationView: View {
     @EnvironmentObject var auth: AuthViewModel
@@ -543,28 +597,16 @@ struct ReauthenticationView: View {
                         .padding(.horizontal)
                 }
                 
-                Button {
+                SignInWithAppleButton()
+                    .padding(.horizontal)
+                
+                GoogleSignInButton {
                     Task {
-                        await reauthenticate()
+                        await reauthenticateWithGoogle()
                     }
-                } label: {
-                    HStack {
-                        if isReauthenticating {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Image(systemName: "globe")
-                            Text("Sign In with Google")
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
                 }
-                .disabled(isReauthenticating)
                 .padding(.horizontal)
+                .disabled(isReauthenticating)
                 
                 Spacer()
             }
@@ -581,7 +623,7 @@ struct ReauthenticationView: View {
         }
     }
     
-    private func reauthenticate() async {
+    private func reauthenticateWithGoogle() async {
         isReauthenticating = true
         errorMessage = nil
         
@@ -594,31 +636,59 @@ struct ReauthenticationView: View {
         }
     }
 }
-
-#Preview("Signed In") {
-    ProfileView(syncManager: SyncManager(modelContext: ModelContext(try! ModelContainer(for: SDApplication.self))))
-        .environmentObject({
-            let auth = AuthViewModel(authService: MockAuthService())
-            auth.user = AppUser(id: "123", firstName: "John", email: "john@example.com")
-            return auth
-        }())
-}
-
-#Preview("Signed Out") {
-    ProfileView(syncManager: SyncManager(modelContext: ModelContext(try! ModelContainer(for: SDApplication.self))))
-        .environmentObject(AuthViewModel(authService: MockAuthService()))
-}
-
-#Preview("Account Settings") {
-    AccountSettingsView(
-        user: AppUser(id: "123", firstName: "John", email: "john@example.com"),
-        syncManager: SyncManager(modelContext: ModelContext(try! ModelContainer(for: SDApplication.self))),
-        interviewCount: 5,
-        onDataDeleted: {}
-    )
-    .environmentObject({
-        let auth = AuthViewModel(authService: MockAuthService())
-        auth.user = AppUser(id: "123", firstName: "John", email: "john@example.com")
-        return auth
-    }())
-}
+//
+//// MARK: - Previews
+//
+//#Preview("Signed In") {
+//    let container = try! ModelContainer(for: SDApplication.self, Interview.self)
+//    let dependencies = AppDependencies(
+//        modelContext: container.mainContext,
+//        authService: MockAuthService()
+//    )
+//    
+//    return ProfileView(syncManager: dependencies.syncManager)
+//        .environmentObject({
+//            let auth = AuthViewModel(authService: MockAuthService())
+//            auth.user = AppUser(id: "123", firstName: "John", email: "john@example.com")
+//            return auth
+//        }())
+//        .environmentObject(dependencies)
+//        .modelContainer(container)
+//}
+//
+//#Preview("Signed Out") {
+//    let container = try! ModelContainer(for: SDApplication.self, Interview.self)
+//    let dependencies = AppDependencies(
+//        modelContext: container.mainContext,
+//        authService: MockAuthService()
+//    )
+//    
+//    return ProfileView(syncManager: dependencies.syncManager)
+//        .environmentObject(AuthViewModel(authService: MockAuthService()))
+//        .environmentObject(dependencies)
+//        .modelContainer(container)
+//}
+//
+//#Preview("Account Settings") {
+//    let container = try! ModelContainer(for: SDApplication.self, Interview.self)
+//    let dependencies = AppDependencies(
+//        modelContext: container.mainContext,
+//        authService: MockAuthService()
+//    )
+//    
+//    return AccountSettingsView(
+//        user: AppUser(id: "123", firstName: "John", email: "john@example.com"),
+//        applicationRepository: dependencies.applicationRepository,
+//        syncManager: dependencies.syncManager,
+//        interviewCount: 5,
+//        applicationCount: 12,
+//        onDataDeleted: {}
+//    )
+//    .environmentObject({
+//        let auth = AuthViewModel(authService: MockAuthService())
+//        auth.user = AppUser(id: "123", firstName: "John", email: "john@example.com")
+//        return auth
+//    }())
+//    .environmentObject(dependencies)
+//    .modelContainer(container)
+//}

@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import AuthenticationServices
 
 @MainActor
 class AuthViewModel: ObservableObject {
@@ -28,6 +29,22 @@ class AuthViewModel: ObservableObject {
         Task {
             do {
                 let user = try await authService.signInWithGoogle()
+                self.user = user
+                isLoading = false
+            } catch {
+                errorMessage = error.localizedDescription
+                isLoading = false
+            }
+        }
+    }
+    
+    func signInWithApple(authorization: ASAuthorization) {
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let user = try await authService.signInWithApple(authorization: authorization)
                 self.user = user
                 isLoading = false
             } catch {

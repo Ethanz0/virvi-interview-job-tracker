@@ -1,5 +1,5 @@
 //
-//  SwiftdataApplicationRepository.swift
+//  SwiftDataApplicationRepository.swift
 //  Virvi
 //
 //  Created by Ethan Zhang on 5/10/2025.
@@ -39,7 +39,6 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         let applications = try modelContext.fetch(descriptor)
         
         return applications.map { sdApp in
-            // FIX 3: Use fetchStages to get filtered stages with SwiftData predicate
             let stages = (try? fetchStagesSync(for: sdApp)) ?? []
             
             return ApplicationWithStages(
@@ -111,6 +110,33 @@ class SwiftDataApplicationRepository: ApplicationRepository {
         
         try modelContext.save()
         syncManager?.scheduleSync()
+    }
+    
+    // MARK: - Bulk Operations
+    
+    func deleteAllApplications() async throws {
+        let descriptor = FetchDescriptor<SDApplication>(
+            predicate: #Predicate { app in
+                app.isDeleted == false
+            }
+        )
+        
+        let applications = try modelContext.fetch(descriptor)
+        
+        for app in applications {
+            try await deleteApplication(app)
+        }
+    }
+    
+    func getApplicationCount() async throws -> Int {
+        let descriptor = FetchDescriptor<SDApplication>(
+            predicate: #Predicate { app in
+                app.isDeleted == false
+            }
+        )
+        
+        let applications = try modelContext.fetch(descriptor)
+        return applications.count
     }
     
     // MARK: - Stage CRUD

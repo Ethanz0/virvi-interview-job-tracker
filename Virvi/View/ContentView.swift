@@ -97,19 +97,19 @@ struct ContentView: View {
 //        }
 //    }
 //}
-#Preview {
-    let container = try! ModelContainer(
-        for: SDApplication.self, Interview.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    
-    let dependencies = AppDependencies(
-        modelContext: container.mainContext,
-        authService: MockAuthService()
-    )
-    
-    ContentView()
-        .environmentObject(AuthViewModel(authService: MockAuthService()))
-        .environmentObject(dependencies)
-        .modelContainer(container)
-}
+//#Preview {
+//    let container = try! ModelContainer(
+//        for: SDApplication.self, Interview.self,
+//        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+//    )
+//    
+//    let dependencies = AppDependencies(
+//        modelContext: container.mainContext,
+//        authService: MockAuthService()
+//    )
+//    
+//    ContentView()
+//        .environmentObject(AuthViewModel(authService: MockAuthService()))
+//        .environmentObject(dependencies)
+//        .modelContainer(container)
+//}

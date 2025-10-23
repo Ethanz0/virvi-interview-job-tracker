@@ -1,6 +1,12 @@
+//
+//  Virvi.swift
+//  Virvi
+//
+//  Created by Ethan Zhang on 23/10/2025.
+//
 import SwiftUI
 import FirebaseCore
-import FirebaseAppCheck  // Add this import
+import FirebaseAppCheck
 import GoogleSignIn
 import SwiftData
 import BackgroundTasks
@@ -38,11 +44,7 @@ struct Virvi: App {
     
     init() {
         // Configure App Check FIRST
-        #if DEBUG
-        let providerFactory = AppCheckDebugProviderFactory()
-        #else
-        let providerFactory = AppAttestProviderFactory()
-        #endif
+        let providerFactory = SimpleAppCheckProviderFactory()
         AppCheck.setAppCheckProviderFactory(providerFactory)
         
         // Then configure Firebase
@@ -141,4 +143,3 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
 }
-
