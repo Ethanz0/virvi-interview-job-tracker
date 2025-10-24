@@ -50,11 +50,6 @@ cd virvi-interview-job-tracker
 open Virvi.xcodeproj
 ```
 
-2. Open the project in Xcode
-```bash
-open Virvi.xcodeproj
-```
-
 3. Add your Firebase configuration
    - Download `GoogleService-Info.plist` from your Firebase Console
    - Add it to the project (both main app and widget targets)
