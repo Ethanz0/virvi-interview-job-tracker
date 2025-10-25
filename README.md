@@ -36,8 +36,8 @@
 
 ## Requirements
 
-- iOS 18.5+
-- Xcode 15.0+
+- iOS 17.3+
+- Xcode 16.0+
 - Firebase project with Firestore and Firebase AI enabled
 
 ## Setup
