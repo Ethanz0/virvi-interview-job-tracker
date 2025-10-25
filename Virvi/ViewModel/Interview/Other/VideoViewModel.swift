@@ -85,8 +85,14 @@ class VideoViewModel: ObservableObject {
         // Confirm output format
         exportSession.outputFileType = .m4a
         
-        // Perform the export
-        try await exportSession.export(to: outputURL, as: .m4a)
+        if #available(iOS 18.0, *) {
+            try await exportSession.export(to: outputURL, as: .m4a)
+        } else {
+            // Fallback for older iOS versions
+            exportSession.outputURL = outputURL
+            exportSession.outputFileType = .m4a
+            await exportSession.export()
+        }
         
         // Return the audio URL
         return outputURL

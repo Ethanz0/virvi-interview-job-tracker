@@ -59,10 +59,10 @@ struct ProfileView: View {
     // MARK: - View Components
     
     private func profileCardSection(user: AppUser) -> some View {
-        Button {
-            showingAccountSettings = true
-        } label: {
-            Section {
+        Section {
+            Button {
+                showingAccountSettings = true
+            } label: {
                 HStack(spacing: 16) {
                     Circle()
                         .fill(LinearGradient(
@@ -98,10 +98,11 @@ struct ProfileView: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(.vertical, 8)
-            }
-        }
-        .buttonStyle(.plain)
-    }
+                   .contentShape(Rectangle())
+               }
+               .buttonStyle(.plain)
+           }
+       }
     
     private var syncStatusSection: some View {
         Section {
@@ -245,7 +246,7 @@ struct ProfileView: View {
         do {
             // Load interview count using interview repository
             let interviewRepo = SwiftDataInterviewRepository(modelContext: dependencies.modelContext)
-            let interviews = try interviewRepo.getAll()
+            let interviews = try interviewRepo.getCompleted()
             interviewCount = interviews.count
             
             // Load application count using application repository
