@@ -5,11 +5,16 @@
   
   A native iOS app that helps job seekers prepare for interviews and track their applications.
   
+  <p>
+    <a href="https://apps.apple.com/us/app/virvi-interview-job-tracker/id6754308224">
+      <img src="app-store-badge.svg" alt="Download on App Store" width="200"/>
+    </a>
+  </p>
+  
   <img src="demo.gif" alt="Virvi Demo" width="300"/>
 </div>
 
 ## Features
-
 - **Mock Interviews**: Practice with AI-generated interview questions tailored to specific roles
 - **Application Tracking**: Keep all your job applications organized in one place
 - **Interview Recording**: Record yourself answering questions (stored locally on device)
